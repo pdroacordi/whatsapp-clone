@@ -15,7 +15,6 @@ public class TokenFilter extends OncePerRequestFilter {
         Authentication auth = TokenUtil.decode(request);
         if(auth == null) {
             response.setStatus(401);
-            return;
         }
         SecurityContextHolder.getContext().setAuthentication(auth);
         filterChain.doFilter(request, response);

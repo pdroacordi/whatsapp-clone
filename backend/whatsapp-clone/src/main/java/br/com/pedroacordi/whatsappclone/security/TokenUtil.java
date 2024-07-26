@@ -1,8 +1,10 @@
 package br.com.pedroacordi.whatsappclone.security;
 
+import br.com.pedroacordi.whatsappclone.models.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,6 +32,18 @@ public class TokenUtil {
     public static final String ISSUER = "*CompNam*";
     public static final String PREFIX = "Bearer ";
 
+    public static String encode(User user){
+        Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+        String jws = Jwts.builder()
+                .setIssuedAt(new Date())
+                .setSubject(user.getEmail())
+                .setIssuer(ISSUER)
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+        return PREFIX + jws;
+    }
+
     public static Authentication decode(HttpServletRequest request) throws ServletException, IOException {
         String token = request.getHeader("Authorization");
 
@@ -37,13 +51,7 @@ public class TokenUtil {
             return null;
         }
 
-        token = token.replace(PREFIX, "");
-        Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
-
-        Jws<Claims> claims = Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token);
+        Jws<Claims> claims = getClaimsFromToken(token);
 
         String subject = claims.getBody().getSubject();
         String issuer = claims.getBody().getIssuer();
@@ -58,6 +66,20 @@ public class TokenUtil {
 
     public static boolean isValidToken(String subject, String issuer, Date exp){
         return subject != null && !subject.isEmpty() && issuer.equals(ISSUER) && exp.after(new Date(System.currentTimeMillis()));
+    }
+
+    public static Jws<Claims> getClaimsFromToken(String token){
+        token = token.replace(PREFIX, "");
+        Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token);
+    }
+
+    public static String getEmailFromToken(String token){
+        Jws<Claims> claims = getClaimsFromToken(token);
+        return claims.getBody().getIssuer();
     }
 
 }
