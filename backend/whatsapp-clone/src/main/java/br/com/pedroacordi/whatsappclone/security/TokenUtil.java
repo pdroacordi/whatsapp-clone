@@ -21,16 +21,16 @@ import java.util.List;
 
 public class TokenUtil {
 
-    public static final String JWT_HEADER = "Authorization ";
-    public static final String SECRET_KEY = "ais451e2u45112sad20214e332djmqopixlaoiwdoiajx152e6312cxa56s";
-    public static final long SECONDS   = 1000;
-    public static final long MINUTES    = 60 * SECONDS;
-    public static final long HOURS      = 60 * MINUTES;
-    public static final long DAYS       = 24 * HOURS;
+    private static final String JWT_HEADER = "Authorization";
+    private static final String SECRET_KEY = "ais451e2u45112sad20214e332djmqopixlaoiwdoiajx152e6312cxa56s";
+    private static final long SECONDS   = 1000;
+    private static final long MINUTES    = 60 * SECONDS;
+    private static final long HOURS      = 60 * MINUTES;
+    private static final long DAYS       = 24 * HOURS;
     public static final long EXPIRATION = 1*DAYS;
 
-    public static final String ISSUER = "*CompNam*";
-    public static final String PREFIX = "Bearer ";
+    private static final String ISSUER = "*CompNam*";
+    private static final String PREFIX = "Bearer ";
 
     public static String encode(User user){
         Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
@@ -45,7 +45,7 @@ public class TokenUtil {
     }
 
     public static Authentication decode(HttpServletRequest request) throws ServletException, IOException {
-        String token = request.getHeader("Authorization");
+        String token = request.getHeader(JWT_HEADER);
 
         if (token == null || !token.startsWith(PREFIX)) {
             return null;

@@ -1,9 +1,14 @@
 package br.com.pedroacordi.whatsappclone.handler;
 
 import br.com.pedroacordi.whatsappclone.exceptions.ExceptionResponse;
+import br.com.pedroacordi.whatsappclone.exceptions.JwtException;
 import br.com.pedroacordi.whatsappclone.exceptions.UserException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,14 +32,6 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
         return new ResponseEntity<>(exceptionResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler(NoHandlerFoundException.class)
-    public final ResponseEntity<ExceptionResponse> handleNoHandlerException(Exception ex, WebRequest request){
-        ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(),
-                ex.getMessage(),
-                request.getDescription(false));
-        return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
-    }
-
     @ExceptionHandler(NoSuchElementException.class)
     public final ResponseEntity<ExceptionResponse> handleNoSuchElementException(Exception ex, WebRequest request){
         ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(),
@@ -43,8 +40,16 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
         return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(NoSuchElementException.class)
+    @ExceptionHandler(BadCredentialsException.class)
     public final ResponseEntity<ExceptionResponse> handleBadCredentialsException(Exception ex, WebRequest request){
+        ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(),
+                ex.getMessage(),
+                request.getDescription(false));
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public final ResponseEntity<ExceptionResponse> handleUsernameNotFound(Exception ex, WebRequest request){
         ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(),
                 ex.getMessage(),
                 request.getDescription(false));
@@ -63,7 +68,7 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
         return new ResponseEntity<>(exceptionResponse, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(UserException.class)
+    @ExceptionHandler(JwtException.class)
     public final ResponseEntity<ExceptionResponse> handleJwtExceptions(Exception ex, WebRequest request){
         ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(),
                 ex.getMessage(),

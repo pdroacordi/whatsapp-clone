@@ -1,6 +1,7 @@
 package br.com.pedroacordi.whatsappclone.controllers;
 
 import br.com.pedroacordi.whatsappclone.models.User;
+import br.com.pedroacordi.whatsappclone.response.ApiResponse;
 import br.com.pedroacordi.whatsappclone.services.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -18,18 +19,27 @@ public class UserController {
     @GetMapping("/")
     public ResponseEntity<User> getUserByToken(@RequestHeader("Authorization") String token){
         User user = service.findUserProfile(token);
-        return new ResponseEntity<User>(user, HttpStatus.OK);
+        return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id){
         User user = service.findUserById(id);
-        return new ResponseEntity<User>(user, HttpStatus.OK)
+        return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Page<User>> getUserByNameOrEmail(@RequestParam(name="value") String value, @RequestParam(name="p", defaultValue = "0") int page){
+    public ResponseEntity<Page<User>> getUserByNameOrEmail(@RequestParam(name="value") String value,
+                                                           @RequestParam(name="p", defaultValue = "0") int page){
         return ResponseEntity.ok(service.searchUser(value, page));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse> updateUser(@PathVariable Long id, @RequestBody User user){
+        user.setId(id);
+        service.update(user);
+        ApiResponse response = new ApiResponse("User updated successfully", true);
+        return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
     }
 
 }

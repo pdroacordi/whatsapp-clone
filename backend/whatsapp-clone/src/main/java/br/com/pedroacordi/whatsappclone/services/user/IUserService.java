@@ -12,8 +12,6 @@ public interface IUserService {
 
     public User findUserProfile(String jwt);
 
-    public User create(User user) throws UserException;
-
     public User update(User user) throws UserException;
 
     public Page<User> searchUser(String name, int page);

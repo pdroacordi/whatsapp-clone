@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -42,17 +43,6 @@ public class UserService implements IUserService{
     }
 
     @Override
-    public User create(User user) throws UserException {
-        if(user.getFullName() == null || user.getEmail() == null || user.getPassword() == null)
-            throw new UserException("Missing information");
-
-        if(user.getFullName().isEmpty() || user.getEmail().isEmpty() || user.getPassword().isEmpty() )
-            throw new UserException("Missing information");
-
-        return repository.save(user);
-    }
-
-    @Override
     public User update(User user) throws UserException {
         User temp = findUserById(user.getId());
 
@@ -77,6 +67,10 @@ public class UserService implements IUserService{
 
     @Override
     public Page<User> searchUser(String name, int page) {
+
+        if( name == null || name.isEmpty() )
+            throw new UserException("Invalid search");
+
         Pageable pageable = PageRequest.of(page, ELEMENTS_PER_PAGE);
         return repository.findUserByEmailOrUsername(name, pageable);
     }
