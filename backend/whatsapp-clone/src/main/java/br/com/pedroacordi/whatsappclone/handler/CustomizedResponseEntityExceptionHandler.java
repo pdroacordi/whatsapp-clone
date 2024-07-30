@@ -1,5 +1,6 @@
 package br.com.pedroacordi.whatsappclone.handler;
 
+import br.com.pedroacordi.whatsappclone.exceptions.ChatException;
 import br.com.pedroacordi.whatsappclone.exceptions.ExceptionResponse;
 import br.com.pedroacordi.whatsappclone.exceptions.JwtException;
 import br.com.pedroacordi.whatsappclone.exceptions.UserException;
@@ -70,6 +71,14 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
 
     @ExceptionHandler(JwtException.class)
     public final ResponseEntity<ExceptionResponse> handleJwtExceptions(Exception ex, WebRequest request){
+        ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(),
+                ex.getMessage(),
+                request.getDescription(false));
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ChatException.class)
+    public final ResponseEntity<ExceptionResponse> handleChatExceptions(Exception ex, WebRequest request){
         ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(),
                 ex.getMessage(),
                 request.getDescription(false));

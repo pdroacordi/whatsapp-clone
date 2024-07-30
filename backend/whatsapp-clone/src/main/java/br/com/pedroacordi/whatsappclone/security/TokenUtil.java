@@ -21,7 +21,7 @@ import java.util.List;
 
 public class TokenUtil {
 
-    private static final String JWT_HEADER = "Authorization";
+    public static final String JWT_HEADER = "Authorization";
     private static final String SECRET_KEY = "ais451e2u45112sad20214e332djmqopixlaoiwdoiajx152e6312cxa56s";
     private static final long SECONDS   = 1000;
     private static final long MINUTES    = 60 * SECONDS;

@@ -13,6 +13,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class UserService implements IUserService{
@@ -24,7 +25,10 @@ public class UserService implements IUserService{
 
     @Override
     public User findUserById(Long id) {
-        return repository.findById(id).orElseThrow();
+        User user = repository.findById(id).orElse(null);
+        if(user == null)
+            throw new NoSuchElementException("User not found");
+        return user;
     }
 
     @Override
@@ -37,7 +41,7 @@ public class UserService implements IUserService{
         User user  = repository.findByEmail(email);
 
         if(user == null)
-            throw new BadCredentialsException("Wrong email");
+            throw new NoSuchElementException("No users found with the given email");
 
         return user;
     }

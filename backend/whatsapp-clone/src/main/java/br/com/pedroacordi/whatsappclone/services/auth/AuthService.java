@@ -28,7 +28,6 @@ public class AuthService implements IAuthService{
     public User create(User user) {
         if(user.getFullName() == null || user.getEmail() == null || user.getPassword() == null)
             throw new UserException("Missing information");
-
         if(user.getFullName().isEmpty() || user.getEmail().isEmpty() || user.getPassword().isEmpty() )
             throw new UserException("Missing information");
 

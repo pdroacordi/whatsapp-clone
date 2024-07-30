@@ -1,11 +1,14 @@
 package br.com.pedroacordi.whatsappclone.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 @Entity
+@Table
 public class User implements Serializable {
 
     @Id
@@ -22,7 +25,6 @@ public class User implements Serializable {
     private String profilePicture;
 
     @Column(nullable = false)
-    @JsonIgnore
     private String password;
 
 
@@ -69,11 +71,26 @@ public class User implements Serializable {
         this.profilePicture = profilePicture;
     }
 
+    @JsonIgnore
     public String getPassword() {
         return password;
     }
 
+    @JsonProperty
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id) && Objects.equals(email, user.email);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, fullName, email);
     }
 }
