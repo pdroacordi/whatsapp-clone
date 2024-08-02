@@ -2,14 +2,17 @@ import React, { useState } from 'react'
 import { TbCircleDashed } from 'react-icons/tb'
 import { BiCommentDetail } from 'react-icons/bi'
 import { AiOutlineSearch } from 'react-icons/ai'
-import { BsFilter, BsThreeDotsVertical } from 'react-icons/bs'
+import { BsEmojiSmile, BsFilter, BsMicFill, BsThreeDotsVertical } from 'react-icons/bs'
 import { FaChevronLeft } from "react-icons/fa6";
+import { ImAttachment } from "react-icons/im";
 import ChatCard from './ChatCard/ChatCard'
+import { MessageCard } from './MessageCard/MessageCard'
 
 
 const HomePage = () => {
     const [queries, setQueries] = useState<string | null>(null);
     const [currentChat, setCurrentChat] = useState<boolean | false>(false);
+    const [content, setContent] = useState<string | "">("");
 
     const handleSearch = (searchValue: string) => {
 
@@ -23,11 +26,14 @@ const HomePage = () => {
         setCurrentChat(false);
     }
 
+    const handleCreateNewMessage = () => {
+
+    }
+
     return (
-        <div className='flex flex-wrap'>
-            <div className=' w-full py-14 bg-[#00a884] '></div>
-            <div className='flex bg-[#f0f2f5] h-[90%] -mt-14  w-full '>
-                <div className={`left ${currentChat ? 'hidden md:block' : 'block'} w-[100%] md:w-[30%] bg-[#e8e9ec] h-full`}>
+        <div className='flex flex-wrap min-h-screen'>
+            <div className='flex bg-[#f0f2f5] h-[100%] w-full '>
+                <div className={`left flex-col ${currentChat ? 'hidden md:flex' : 'flex'} w-[100%] md:w-[30%] bg-[#e8e9ec] h-screen`}>
                     <div className='w-full'>
                         <div className='flex justify-between items-center p-3'>
                             <div className='flex items-center space-x-3'>
@@ -39,7 +45,7 @@ const HomePage = () => {
                                 <BiCommentDetail className='hidden md:block' />
                             </div>
                         </div>
-                        <div className='relative flex justify-center items-center bg-white py-4 px-3'>
+                        <div className='flex justify-center items-center bg-white py-4 px-3'>
                             <div className='flex items-center w-full bg-slate-200 rounded-md'>
                                 <AiOutlineSearch className='ml-3' />
                                 <input className='border-none outline-none bg-slate-200 rounded-md w-[93%] pl-2 md:pl-4 lg:pl-6 py-2'
@@ -58,16 +64,12 @@ const HomePage = () => {
                             </div>
                         </div>
                     </div>
-                    <div className='bg-white overflow-y-scroll h-[76.8vh]'>
+                    <div className='chats flex-1 bg-white overflow-y-scroll'>
                         {queries && [1, 2, 3, 4].map((item) =>
                             <div onClick={handleClickOnChatCard}>
-
                                 <ChatCard />
                             </div>
                         )}
-                    </div>
-                    <div>
-
                     </div>
                 </div>
                 {!currentChat && <div className='hidden md:flex w-[70%] flex-col items-center justify-center h-full'>
@@ -78,14 +80,13 @@ const HomePage = () => {
                 </div>}
 
                 {/*  Chat */}
-
-                {currentChat &&
-                    <div className='header w-[100%] md:w-[70%] bg-[#f0f2f5]'>
+                {currentChat && <div className='chatContainer flex flex-col h-screen w-[100%] md:w-[70%] bg-[#f0f2f5]'>
+                    <div className='w-[100%] bg-[#d8d9db]'>
                         <div >
                             <div className='flex justify-between'>
                                 <div className='py-3 space-x-4 flex items-center px-3'>
-                                    <FaChevronLeft className='cursor-pointer block  md:hidden' onClick={handleBackFromChatClick}/>
-                                    <img className='w-10 h-10 rounded-full' src='https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541' />
+                                    <FaChevronLeft className='cursor-pointer block  md:hidden' onClick={handleBackFromChatClick} />
+                                    <img className='w-10 h-10 rounded-full' src='https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png' />
                                     <p>Fullname</p>
                                 </div>
                                 <div className='py-3 space-x-4 flex items-center px-3'>
@@ -95,8 +96,21 @@ const HomePage = () => {
                             </div>
                         </div>
                     </div>
-                }
+                    <div className='flex-1 px-10 h-[84%] overflow-y-scroll'>
+                        <div className='space-y-1 flex flex-col justify-center  py-2'>
+                            {[1, 1, 1, 1, 1].map((item, i) => <MessageCard content="hi" isReqUserMessage={i % 2 === 0} />)}
+                        </div>
+                    </div>
 
+                    <div className='footer bg-[#f0f2f5] flex items-center space-x-1 p-3'>
+                        <div className='flex space-x-1'>
+                            <BsEmojiSmile className='cursor-pointer text-2xl' />
+                            <ImAttachment className='cursor-pointer text-2xl' />
+                        </div>
+                        <input className='py-2 outline-none border-none bg-white pl-4 rounded-md w-[85%]' type='text' onChange={(e) => setContent(e.target.value)} placeholder='type message' value={content} onKeyDown={(e) => { if (e.key === "Enter") { handleCreateNewMessage(); setContent("") } }} />
+                        <BsMicFill className='text-2xl' />
+                    </div>
+                </div>}
             </div>
         </div>
     )
