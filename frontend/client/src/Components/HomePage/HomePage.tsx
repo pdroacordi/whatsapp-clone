@@ -11,6 +11,7 @@ import './HomePage.css'
 import { useNavigate } from 'react-router-dom'
 import Profile from '../Profile/Profile'
 import { Button, Menu, MenuItem } from '@mui/material'
+import CreateGroup from '../Group/CreateGroup'
 
 
 const HomePage = () => {
@@ -20,6 +21,7 @@ const HomePage = () => {
     const [isProfileOpen, setIsProfileOpen] = useState<boolean | false>(false);
     const [profileAnimation, setProfileAnimation] = useState<string | ''>('');
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+    const [isCreateGroupOpen, setIsCreateGroupOpen] = useState<boolean | false>(false);
     const open = Boolean(anchorEl);
 
 
@@ -58,22 +60,30 @@ const HomePage = () => {
         }
     }
 
+    const handleCreateGroup = () => {
+        if (isCreateGroupOpen) {
+            setProfileAnimation('profile-animate-out');
+            setTimeout(() => {
+                setIsCreateGroupOpen(false);
+            }, 200);
+        } else {
+            setProfileAnimation('profile-animate-in');
+            setIsCreateGroupOpen(true);
+        }
+    }
+
     useEffect(() => {
         if (isProfileOpen) {
             setProfileAnimation('profile-animate-in');
         }
     }, [isProfileOpen]);
 
-    function handleCreateGroup(): void {
-        throw new Error('Function not implemented.')
-    }
-
     return (
         <div className='flex flex-wrap min-h-screen'>
             <div className='flex bg-[#f0f2f5] h-[100%] w-full '>
                 {isProfileOpen && <div className='bg-black w-screen h-screen absolute opacity-50'></div>}
                 <div className={`left flex-col ${currentChat ? 'hidden md:flex' : 'flex'} w-[100%] md:w-[30%] bg-[#e8e9ec] h-screen`}>
-                    <div className='w-full flex flex-col h-full'>
+                    <div className='w-full flex flex-col h-full overflow-hidden'>
 
                         {/* profile */}
                         {isProfileOpen &&
@@ -81,8 +91,14 @@ const HomePage = () => {
                                 <Profile handleCloseOpenProfile={handleCloseOpenProfile} />
                             </div>
                         }
+                        {/** create group */}
+                        {isCreateGroupOpen &&
+                            <div className={`w-full h-full ${profileAnimation} z-10 shadow-2xl `}>
+                                <CreateGroup handleCloseOpenCreateGroup={handleCreateGroup} />
+                            </div>
+                        }
                         {/* home */}
-                        {!isProfileOpen && <div className='flex flex-col flex-1'>
+                        {!isProfileOpen && !isCreateGroupOpen && <div className='flex flex-col flex-1 '>
                             <div className='flex justify-between items-center p-3'>
                                 <div onClick={handleCloseOpenProfile} className='flex items-center space-x-3 cursor-pointer'>
                                     <img className='rounded-full w-10 h-10' src='https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541'></img>
@@ -131,10 +147,10 @@ const HomePage = () => {
                                 </div>
                             </div>
 
-                            <div className='chats flex-1 bg-white overflow-y-scroll'>
-                                {queries && [1, 2, 3, 4].map((item) =>
+                            <div className='chats flex-1 bg-white overflow-y-auto max-h-screen'>
+                                {queries && [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].map((item) =>
                                     <div onClick={handleClickOnChatCard} className='hover:bg-gray-100'>
-                                        <ChatCard />
+                                        <ChatCard isChat={true} />
                                     </div>
                                 )}
                             </div>
