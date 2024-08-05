@@ -81,7 +81,7 @@ const HomePage = () => {
     return (
         <div className='flex flex-wrap min-h-screen'>
             <div className='flex bg-[#f0f2f5] h-[100%] w-full '>
-                {isProfileOpen && <div className='bg-black w-screen h-screen absolute opacity-50'></div>}
+                { (isProfileOpen || isCreateGroupOpen) && <div className='bg-black w-screen h-screen absolute opacity-50'></div>}
                 <div className={`left flex-col ${currentChat ? 'hidden md:flex' : 'flex'} w-[100%] md:w-[30%] bg-[#e8e9ec] h-screen`}>
                     <div className='w-full flex flex-col h-full overflow-hidden'>
 
@@ -183,7 +183,7 @@ const HomePage = () => {
                     </div>
                     <div className='flex-1 px-10 h-[84%] overflow-y-scroll'>
                         <div className='space-y-1 flex flex-col justify-center  py-2'>
-                            {[1, 1, 1, 1, 1].map((item, i) => <MessageCard content="hi" isReqUserMessage={i % 2 !== 0} />)}
+                            {[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,1,1,1,1,1,1,1,1,1,1,1,1, 1, ,1, 1, ,1,1].map((item, i) => <MessageCard content="hi" isReqUserMessage={i % 2 !== 0} />)}
                         </div>
                     </div>
 

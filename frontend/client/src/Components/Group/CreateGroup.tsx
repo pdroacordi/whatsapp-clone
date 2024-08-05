@@ -36,7 +36,7 @@ const CreateGroup: React.FC<CreateGroupProps> = ({ handleCloseOpenCreateGroup })
 
 
     return (
-        <div className='w-full h-full flex flex-col'>
+        <div className='w-full h-full flex flex-col bg-white'>
             {!newGroup &&
                 <div className='flex flex-col flex-grow overflow-hidden'>
                     <div className='flex items-center space-x-10 bg-[#008069] text-white px-10 py-5'>
