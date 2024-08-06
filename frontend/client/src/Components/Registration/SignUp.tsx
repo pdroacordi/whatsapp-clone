@@ -2,8 +2,9 @@ import { Alert, Snackbar } from '@mui/material';
 import React, { useState } from 'react'
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { register } from '../../Redux/Auth/Action';
 import { UserRequest } from '../../Request/UserRequest';
+import { registerUser } from '../../Redux/features/user/userSlice';
+import { AppDispatch } from '../../Redux/store';
 
 interface RegistrationObject {
     email: string;
@@ -17,7 +18,7 @@ const SignUp = () => {
     const [snackbarMessage, setSnackbarMessage] = useState<string | ''>('');
     const [isSnackbarSuccessful, setIsSnackbarSuccessful] = useState<boolean>(true);
     const navigate = useNavigate();
-    const dispatch = useDispatch();
+    const dispatch = useDispatch<AppDispatch>();
 
     const handleChange = (e: any) => {
         const {name, value} = e.target;
@@ -26,7 +27,8 @@ const SignUp = () => {
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-
+        
+        dispatch(registerUser(getUserRequestFromInputData()));
 
         setIsSnackbarSuccessful(true);
         setSnackbarMessage('Account created succesfully');
@@ -38,7 +40,7 @@ const SignUp = () => {
     }
 
     function getUserRequestFromInputData() : UserRequest{
-        let userReq : UserRequest = { user : {id: 0, email: inputData.email, fullName: inputData.fullName, password: inputData.password}, token: '', query: '', page: 0 }
+        let userReq : UserRequest = { user : {email: inputData.email, fullName: inputData.fullName, password: inputData.password} }
         return userReq;
     }
 
@@ -46,7 +48,7 @@ const SignUp = () => {
         <div>
             <div>
                 <div className='flex flex-col justify-center h-screen items-center'>
-                    <div className='w-[90%] md:w-[50%] xl:w-[20%] p-10 shadow-md bg-white rounded-xl'>
+                    <div className='w-[90%] md:w-[50%] lg:w-[40%] xl:w-[35%] 2xl:w-[20%] p-10 shadow-md bg-white rounded-xl'>
                         <form className='space-y-5' onSubmit={handleSubmit}>
                             <div>
                                 <p className='mb-2'>Name</p>

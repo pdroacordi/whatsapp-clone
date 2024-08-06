@@ -32,7 +32,7 @@ const SignIn = () => {
     return (
         <div>
             <div className='flex justify-center h-screen items-center'>
-                <div className='w-[90%] md:w-[50%] xl:w-[20%] p-10 shadow-md bg-white rounded-xl'>
+                <div className='w-[90%] md:w-[50%] lg:w-[40%] xl:w-[35%] 2xl:w-[20%] p-10 shadow-md bg-white rounded-xl'>
                     <form onSubmit={handleSubmit} className='space-y-5'>
                         <div>
                             <p className='mb-2'>Email</p>
