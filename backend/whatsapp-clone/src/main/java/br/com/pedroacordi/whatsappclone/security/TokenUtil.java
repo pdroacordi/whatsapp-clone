@@ -1,10 +1,7 @@
 package br.com.pedroacordi.whatsappclone.security;
 
 import br.com.pedroacordi.whatsappclone.models.User;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,7 +24,7 @@ public class TokenUtil {
     private static final long MINUTES    = 60 * SECONDS;
     private static final long HOURS      = 60 * MINUTES;
     private static final long DAYS       = 24 * HOURS;
-    public static final long EXPIRATION = 1*DAYS;
+    public static final long EXPIRATION = 1 * DAYS;
 
     private static final String ISSUER = "*CompNam*";
     private static final String PREFIX = "Bearer ";
@@ -44,7 +41,7 @@ public class TokenUtil {
         return PREFIX + jws;
     }
 
-    public static Authentication decode(HttpServletRequest request) throws ServletException, IOException {
+    public static Authentication decode(HttpServletRequest request) {
         String token = request.getHeader(JWT_HEADER);
 
         if (token == null || !token.startsWith(PREFIX)) {
@@ -79,7 +76,7 @@ public class TokenUtil {
 
     public static String getEmailFromToken(String token){
         Jws<Claims> claims = getClaimsFromToken(token);
-        return claims.getBody().getIssuer();
+        return claims.getBody().getSubject();
     }
 
 }

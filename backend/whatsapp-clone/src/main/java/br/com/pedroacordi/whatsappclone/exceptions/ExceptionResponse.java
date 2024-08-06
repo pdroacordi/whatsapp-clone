@@ -1,5 +1,7 @@
 package br.com.pedroacordi.whatsappclone.exceptions;
 
+import org.springframework.http.HttpStatus;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -9,10 +11,13 @@ public class ExceptionResponse implements Serializable {
     private String message;
     private String details;
 
-    public ExceptionResponse(Date timestamp, String message, String details) {
+    private int status;
+
+    public ExceptionResponse(Date timestamp, String message, String details, int status) {
         this.timestamp = timestamp;
         this.message = message;
         this.details = details;
+        this.status = status;
     }
 
     public Date getTimestamp() {
@@ -37,5 +42,13 @@ public class ExceptionResponse implements Serializable {
 
     public void setDetails(String details) {
         this.details = details;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 }

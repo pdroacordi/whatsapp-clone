@@ -37,7 +37,6 @@ public class UserService implements IUserService{
 
         if(email == null)
             throw new JwtException("Invalid Token");
-
         User user  = repository.findByEmail(email);
 
         if(user == null)

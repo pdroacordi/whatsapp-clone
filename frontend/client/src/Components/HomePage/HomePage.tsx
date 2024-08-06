@@ -10,8 +10,11 @@ import { MessageCard } from '../MessageCard/MessageCard'
 import './HomePage.css'
 import { useNavigate } from 'react-router-dom'
 import Profile from '../Profile/Profile'
-import { Button, Menu, MenuItem } from '@mui/material'
+import { Menu, MenuItem } from '@mui/material'
 import CreateGroup from '../Group/CreateGroup'
+import { useDispatch, useSelector } from 'react-redux'
+import { getCurrentUser, logout } from '../../Redux/features/user/userSlice'
+import { AppDispatch, RootState } from '../../Redux/store'
 
 
 const HomePage = () => {
@@ -22,7 +25,11 @@ const HomePage = () => {
     const [profileAnimation, setProfileAnimation] = useState<string | ''>('');
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const [isCreateGroupOpen, setIsCreateGroupOpen] = useState<boolean | false>(false);
+    const navigate = useNavigate();
     const open = Boolean(anchorEl);
+    const dispatch = useDispatch<AppDispatch>();
+    const { user } = useSelector((state: RootState) => state.user);
+    const token = localStorage.getItem('token');
 
 
     const handleClickMenu = (e: any) => {
@@ -70,6 +77,12 @@ const HomePage = () => {
             setProfileAnimation('profile-animate-in');
             setIsCreateGroupOpen(true);
         }
+        handleCloseMenu();
+    }
+
+    const handleLogout = () => {
+        handleCloseMenu();
+        dispatch(logout());
     }
 
     useEffect(() => {
@@ -78,10 +91,20 @@ const HomePage = () => {
         }
     }, [isProfileOpen]);
 
+    useEffect(() => {
+        if(user == null){
+            navigate('/signin');
+        }
+    },[user]);
+
+    useEffect(() => {
+        if(token) dispatch(getCurrentUser(token))
+    }, [token]);
+
     return (
         <div className='flex flex-wrap min-h-screen'>
             <div className='flex bg-[#f0f2f5] h-[100%] w-full '>
-                { (isProfileOpen || isCreateGroupOpen) && <div className='bg-black w-screen h-screen absolute opacity-50'></div>}
+                {(isProfileOpen || isCreateGroupOpen) && <div className='bg-black w-screen h-screen absolute opacity-50'></div>}
                 <div className={`left flex-col ${currentChat ? 'hidden md:flex' : 'flex'} w-[100%] md:w-[30%] bg-[#e8e9ec] h-screen`}>
                     <div className='w-full flex flex-col h-full overflow-hidden'>
 
@@ -102,7 +125,7 @@ const HomePage = () => {
                             <div className='flex justify-between items-center p-3'>
                                 <div onClick={handleCloseOpenProfile} className='flex items-center space-x-3 cursor-pointer'>
                                     <img className='rounded-full w-10 h-10' src='https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541'></img>
-                                    <p>Username</p>
+                                    <p>{user?.fullName}</p>
                                 </div>
                                 <div className='space-x-3 text-2xl flex items-center'>
                                     <BiCommentDetail className='hidden md:block' />
@@ -123,7 +146,7 @@ const HomePage = () => {
                                             }}
                                         >
                                             <MenuItem onClick={handleCreateGroup}>Create group chat</MenuItem>
-                                            <MenuItem onClick={handleCloseMenu}>Logout</MenuItem>
+                                            <MenuItem onClick={handleLogout}>Logout</MenuItem>
                                         </Menu>
                                     </div>
                                 </div>
@@ -183,7 +206,7 @@ const HomePage = () => {
                     </div>
                     <div className='flex-1 px-10 h-[84%] overflow-y-scroll'>
                         <div className='space-y-1 flex flex-col justify-center  py-2'>
-                            {[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,1,1,1,1,1,1,1,1,1,1,1,1, 1, ,1, 1, ,1,1].map((item, i) => <MessageCard content="hi" isReqUserMessage={i % 2 !== 0} />)}
+                            {[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, , 1, 1, , 1, 1].map((item, i) => <MessageCard content="hi" isReqUserMessage={i % 2 !== 0} />)}
                         </div>
                     </div>
 

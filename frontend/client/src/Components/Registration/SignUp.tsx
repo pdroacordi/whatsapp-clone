@@ -1,10 +1,12 @@
 import { Alert, Snackbar } from '@mui/material';
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { UserRequest } from '../../Request/UserRequest';
-import { registerUser } from '../../Redux/features/user/userSlice';
-import { AppDispatch } from '../../Redux/store';
+import { getCurrentUser, registerUser, saveToken } from '../../Redux/features/user/userSlice';
+import { AppDispatch, RootState } from '../../Redux/store';
+import { unwrapResult } from '@reduxjs/toolkit';
+import { useSelector } from 'react-redux';
 
 interface RegistrationObject {
     email: string;
@@ -19,30 +21,55 @@ const SignUp = () => {
     const [isSnackbarSuccessful, setIsSnackbarSuccessful] = useState<boolean>(true);
     const navigate = useNavigate();
     const dispatch = useDispatch<AppDispatch>();
+    const { user } = useSelector((state: RootState) => state.user);
+    const token = localStorage.getItem('token');
 
     const handleChange = (e: any) => {
-        const {name, value} = e.target;
-        setInputData((values) => ({...values, [name]:value}))
+        const { name, value } = e.target;
+        setInputData((values) => ({ ...values, [name]: value }))
     }
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        
-        dispatch(registerUser(getUserRequestFromInputData()));
 
-        setIsSnackbarSuccessful(true);
-        setSnackbarMessage('Account created succesfully');
-        setOpenSnackbar(true);
+        try {
+            const actionResult = await dispatch(registerUser(getUserRequestFromInputData()));
+            const response = unwrapResult(actionResult);
+            if (response.status == 201) {
+                setIsSnackbarSuccessful(true);
+                setSnackbarMessage('Account created successfully');
+                saveToken(response.token);
+            } else {
+                setIsSnackbarSuccessful(false);
+                setSnackbarMessage(`Error: ${response.message}` || 'Failed to create account');
+            }
+        } catch (error: any) {
+            setIsSnackbarSuccessful(false);
+            setSnackbarMessage(error.message || 'Failed to create account');
+        } finally {
+            setOpenSnackbar(true);
+        }
+
     }
 
     const handleSnackbar = () => {
         setOpenSnackbar(!openSnackbar);
     }
 
-    function getUserRequestFromInputData() : UserRequest{
-        let userReq : UserRequest = { user : {email: inputData.email, fullName: inputData.fullName, password: inputData.password} }
+    function getUserRequestFromInputData(): UserRequest {
+        let userReq: UserRequest = { user: { email: inputData.email, fullName: inputData.fullName, password: inputData.password } }
         return userReq;
     }
+
+    useEffect(() => {
+        if (token) dispatch(getCurrentUser(token))
+    }, [token])
+
+    useEffect(() => {
+        if (user?.fullName) {
+            navigate('/');
+        }
+    }, [user]);
 
     return (
         <div>

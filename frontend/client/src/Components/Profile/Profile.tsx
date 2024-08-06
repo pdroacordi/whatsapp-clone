@@ -33,7 +33,7 @@ const Profile: React.FC<ProfileProps> = ({handleCloseOpenProfile}) => {
             </div>
 
             <div className='px-8'>
-                <p className='py-3 font-semibold text-2xl'>Hi! I my name is...</p>
+                <p className='py-3 font-semibold text-2xl'>Hi! My name is...</p>
                 {!flag &&
                     <div className='w-full flex justify-between items-center whitespace-nowrap' onClick={() => toggleEdit()}>
                         <div className='flex-grow flex justify-between border-b border-gray-700 cursor-pointer max-w-[100%]' >

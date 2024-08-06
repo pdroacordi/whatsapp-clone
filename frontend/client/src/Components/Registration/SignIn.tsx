@@ -1,6 +1,11 @@
 import { Alert, Button, Snackbar } from '@mui/material';
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { AppDispatch, RootState } from '../../Redux/store';
+import { unwrapResult } from '@reduxjs/toolkit';
+import { getCurrentUser, loginUser, saveToken } from '../../Redux/features/user/userSlice';
+import { UserRequest } from '../../Request/UserRequest';
 
 interface AuthObject {
     email: string;
@@ -8,25 +13,59 @@ interface AuthObject {
 }
 
 const SignIn = () => {
-    const [inputData, setInputData] = useState<AuthObject | null>({email: '', password: ''});
+    const [inputData, setInputData] = useState<AuthObject>({email: '', password: ''});
     const [openSnackbar, setOpenSnackbar] = useState<boolean | false>(false);
     const [snackbarMessage, setSnackbarMessage] = useState<string | ''>('');
     const [isSnackbarSuccessful, setIsSnackbarSuccessful] = useState<boolean | true>(true);
     const navigate = useNavigate();
+    const dispatch = useDispatch<AppDispatch>();
+    const { user } = useSelector((state: RootState) => state.user);
+    const token = localStorage.getItem('token');
 
-    const handleSubmit = (e : any) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        setIsSnackbarSuccessful(true);
-        setSnackbarMessage('Logged in succesfully');
-        setOpenSnackbar(true);
+
+        try {
+            const actionResult = await dispatch(loginUser(getUserRequestFromInputData()));
+            const response = unwrapResult(actionResult);
+            if (response.status == 202) {
+                setIsSnackbarSuccessful(true);
+                setSnackbarMessage('Login successful');
+                saveToken(response.token);
+            } else {
+                setIsSnackbarSuccessful(false);
+                setSnackbarMessage(`Error: ${response.message}` || 'Failed to authenticate');
+            }
+        } catch (error: any) {
+            setIsSnackbarSuccessful(false);
+            setSnackbarMessage(error.message || 'Failed to authenticate');
+        } finally {
+            setOpenSnackbar(true);
+        }
     }
 
-    const handleChange = () => {
+    useEffect(() => {
+        if (token) dispatch(getCurrentUser(token))
+    }, [token])
 
+    useEffect(() => {
+        if (user?.fullName) {
+            navigate('/');
+        }
+    }, [user]);
+
+    const handleChange = (e: any) => {
+        const { name, value } = e.target;
+        setInputData((values) => ({ ...values, [name]: value }))
     }
 
     const handleSnackbar = () => {
         setOpenSnackbar(!openSnackbar);
+    }
+
+    function getUserRequestFromInputData(): UserRequest {
+        let userReq: UserRequest = { user: { email: inputData.email, password: inputData.password } }
+        return userReq;
     }
 
     return (
@@ -39,17 +78,19 @@ const SignIn = () => {
                             <input type="text"
                                 className='p-2 outline outline-gray-200 focus:outline-green-600 w-full rounded-md border'
                                 placeholder='Enter your best email'
-                                onChange={handleChange}
-                                value={inputData?.email}
+                                name='email'
+                                onChange={(e) => handleChange(e)}
+                                value={inputData.email}
                             />
                         </div>
                         <div>
                             <p className='mb-2'>Password</p>
-                            <input type="text"
+                            <input type="password"
                                 className='p-2 outline outline-gray-200 focus:outline-green-600 w-full rounded-md border'
                                 placeholder='Enter your password'
-                                onChange={handleChange}
-                                value={inputData?.password}
+                                name='password'
+                                onChange={(e) => handleChange(e)}
+                                value={inputData.password}
                             />
                         </div>
                         <div>
