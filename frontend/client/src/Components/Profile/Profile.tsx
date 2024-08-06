@@ -2,6 +2,8 @@ import React, { useState } from 'react'
 import { BsArrowLeft, BsCheck, BsPencil } from 'react-icons/bs'
 import { useNavigate } from 'react-router-dom'
 import './Profile.css';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../Redux/store';
 
 interface ProfileProps {
     handleCloseOpenProfile : () => void;
@@ -9,7 +11,8 @@ interface ProfileProps {
 
 const Profile: React.FC<ProfileProps> = ({handleCloseOpenProfile}) => {
     const [flag, setFlag] = useState<boolean | false>(false);
-    const [fullName, setFullName] = useState<string | "Tchicka Tchicka Slim Shady">("Tchicka Tchicka Slim Shady");
+    const { curUser } = useSelector((state: RootState) => state.user);
+    const [fullName, setFullName] = useState<string | ''>(curUser?.fullName??'');
 
     const toggleEdit = () => {
         setFlag(!flag);

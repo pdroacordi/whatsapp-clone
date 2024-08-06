@@ -19,7 +19,7 @@ const SignIn = () => {
     const [isSnackbarSuccessful, setIsSnackbarSuccessful] = useState<boolean | true>(true);
     const navigate = useNavigate();
     const dispatch = useDispatch<AppDispatch>();
-    const { user } = useSelector((state: RootState) => state.user);
+    const { curUser } = useSelector((state: RootState) => state.user);
     const token = localStorage.getItem('token');
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -49,10 +49,10 @@ const SignIn = () => {
     }, [token])
 
     useEffect(() => {
-        if (user?.fullName) {
+        if (curUser?.fullName) {
             navigate('/');
         }
-    }, [user]);
+    }, [curUser]);
 
     const handleChange = (e: any) => {
         const { name, value } = e.target;

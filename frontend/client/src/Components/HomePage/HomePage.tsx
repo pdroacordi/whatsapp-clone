@@ -28,7 +28,7 @@ const HomePage = () => {
     const navigate = useNavigate();
     const open = Boolean(anchorEl);
     const dispatch = useDispatch<AppDispatch>();
-    const { user } = useSelector((state: RootState) => state.user);
+    const { curUser } = useSelector((state: RootState) => state.user);
     const token = localStorage.getItem('token');
 
 
@@ -92,10 +92,10 @@ const HomePage = () => {
     }, [isProfileOpen]);
 
     useEffect(() => {
-        if(user == null){
+        if(curUser == null){
             navigate('/signin');
         }
-    },[user]);
+    },[curUser]);
 
     useEffect(() => {
         if(token) dispatch(getCurrentUser(token))
@@ -125,7 +125,7 @@ const HomePage = () => {
                             <div className='flex justify-between items-center p-3'>
                                 <div onClick={handleCloseOpenProfile} className='flex items-center space-x-3 cursor-pointer'>
                                     <img className='rounded-full w-10 h-10' src='https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541'></img>
-                                    <p>{user?.fullName}</p>
+                                    <p>{curUser?.fullName}</p>
                                 </div>
                                 <div className='space-x-3 text-2xl flex items-center'>
                                     <BiCommentDetail className='hidden md:block' />

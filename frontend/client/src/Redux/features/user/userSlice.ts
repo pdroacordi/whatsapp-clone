@@ -4,13 +4,13 @@ import { UserRequest } from '../../../Request/UserRequest';
 import { User } from '../../../Models/User';
 
 interface UserState {
-    user: User | null;
+    curUser: User | null;
     loading: boolean;
     error: string | null;
 }
 
 const initialState: UserState = {
-    user: null,
+    curUser: null,
     loading: false,
     error: null,
 };
@@ -141,9 +141,22 @@ const userSlice = createSlice({
             })
             .addCase(registerUser.fulfilled, (state, action: PayloadAction<any>) => {
                 state.loading = false;
-                state.user = action.payload;
+                state.curUser = action.payload;
             })
             .addCase(registerUser.rejected, (state, action: PayloadAction<any>) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+            //Login user
+            .addCase(loginUser.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(loginUser.fulfilled, (state, action: PayloadAction<any>) => {
+                state.loading = false;
+                state.curUser = action.payload;
+            })
+            .addCase(loginUser.rejected, (state, action: PayloadAction<any>) => {
                 state.loading = false;
                 state.error = action.payload;
             })
@@ -154,7 +167,7 @@ const userSlice = createSlice({
             })
             .addCase(getCurrentUser.fulfilled, (state, action: PayloadAction<any>) => {
                 state.loading = false;
-                state.user = action.payload;
+                state.curUser = action.payload;
             })
             .addCase(getCurrentUser.rejected, (state, action: PayloadAction<any>) => {
                 state.loading = false;
@@ -162,7 +175,7 @@ const userSlice = createSlice({
             })
             //Logout
             .addCase(logout.fulfilled, (state) => {
-                state.user = null;
+                state.curUser = null;
                 state.loading = false;
                 state.error = null;
             })

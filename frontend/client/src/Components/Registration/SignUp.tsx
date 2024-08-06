@@ -21,7 +21,7 @@ const SignUp = () => {
     const [isSnackbarSuccessful, setIsSnackbarSuccessful] = useState<boolean>(true);
     const navigate = useNavigate();
     const dispatch = useDispatch<AppDispatch>();
-    const { user } = useSelector((state: RootState) => state.user);
+    const { curUser } = useSelector((state: RootState) => state.user);
     const token = localStorage.getItem('token');
 
     const handleChange = (e: any) => {
@@ -66,10 +66,10 @@ const SignUp = () => {
     }, [token])
 
     useEffect(() => {
-        if (user?.fullName) {
+        if (curUser?.fullName) {
             navigate('/');
         }
-    }, [user]);
+    }, [curUser]);
 
     return (
         <div>
