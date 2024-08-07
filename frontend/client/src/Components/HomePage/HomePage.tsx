@@ -208,7 +208,6 @@ const HomePage = () => {
                     setOpenSnackbar(true);
                     return;
                 }
-                console.log(result.payload);
             })
             .catch(error => {
                 setSnackbarMessage('Failed to get messages: ' + error);

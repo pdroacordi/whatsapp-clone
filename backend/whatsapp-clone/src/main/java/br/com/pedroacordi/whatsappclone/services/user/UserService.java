@@ -52,16 +52,16 @@ public class UserService implements IUserService{
         if(temp == null)
             throw new UserException("Nonexistent user");
 
-        if( !temp.getEmail().equals(user.getEmail() ) )
+        if( user.getEmail() != null && !user.getEmail().equals(temp.getEmail()) )
             temp.setEmail(user.getEmail());
 
-        if( !temp.getFullName().equals(user.getFullName() ) )
+        if( user.getFullName() != null && !user.getFullName().equals(temp.getFullName()) )
             temp.setFullName(user.getFullName());
 
-        if( !temp.getProfilePicture().equals(user.getProfilePicture() ) )
+        if( user.getProfilePicture() != null && !user.getProfilePicture().equals(temp.getProfilePicture()) )
             temp.setProfilePicture(user.getProfilePicture());
 
-        if( !temp.getPassword().equals(user.getPassword() ) )
+        if( user.getPassword() != null && !user.getPassword().equals(temp.getPassword()) )
             temp.setPassword(user.getPassword());
 
 

@@ -53,7 +53,6 @@ export const getUserChats = createAsyncThunk(
                 },
             });
             const data = await response.json();
-            console.log(data);
             data.status = response.status;
             return data;
         } catch (error: any) {

@@ -1,18 +1,32 @@
 import React, { useState } from 'react'
 import { BsArrowLeft, BsCheck, BsPencil } from 'react-icons/bs'
-import { useNavigate } from 'react-router-dom'
 import './Profile.css';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../Redux/store';
+import { AppDispatch, RootState } from '../../Redux/store';
+import { CLOUD_NAME, PRESET_NAME } from '../../Config/api';
+import { useDispatch } from 'react-redux';
+import { updateUser } from '../../Redux/features/user/userSlice';
+import { Alert, Snackbar } from '@mui/material';
+import { User } from '../../Models/User';
 
 interface ProfileProps {
-    handleCloseOpenProfile : () => void;
+    handleCloseOpenProfile: () => void;
 }
 
-const Profile: React.FC<ProfileProps> = ({handleCloseOpenProfile}) => {
+const Profile: React.FC<ProfileProps> = ({ handleCloseOpenProfile }) => {
     const [flag, setFlag] = useState<boolean | false>(false);
+
+    const dispatch = useDispatch<AppDispatch>();
     const { curUser } = useSelector((state: RootState) => state.user);
-    const [fullName, setFullName] = useState<string | ''>(curUser?.fullName??'');
+
+    const [fullName, setFullName] = useState<string | ''>(curUser?.fullName ?? '');
+    const [tempPicture, setTempPicture] = useState<string>(curUser?.profilePicture ?? 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541');
+
+    const [openSnackbar, setOpenSnackbar] = useState<boolean>(false);
+    const [snackbarMessage, setSnackbarMessage] = useState<string | ''>('');
+    const [isSnackbarSuccessful, setIsSnackbarSuccessful] = useState<boolean>(true);
+
+    const token = localStorage.getItem('token') || '';
 
     const toggleEdit = () => {
         setFlag(!flag);
@@ -20,6 +34,55 @@ const Profile: React.FC<ProfileProps> = ({handleCloseOpenProfile}) => {
 
     const handleCheckClick = () => {
         setFlag(false);
+    }
+
+    const handleSnackbar = () => {
+        setOpenSnackbar(!openSnackbar);
+    }
+
+    const uploadToCloudinary = (pictures: any) => {
+        const data = new FormData();
+        data.append("file", pictures);
+        data.append("upload_preset", PRESET_NAME);
+        data.append('cloud_name', CLOUD_NAME);
+        fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+            method: 'POST',
+            body: data
+        })
+            .then((res) => res.json())
+            .then((data: any) => {
+                setTempPicture(data.url.toString());
+
+                if (curUser === null) return;
+                const user: User = { ...curUser, profilePicture: data.url.toString() };
+                dispatch(updateUser({ user: user, token: token }))
+                    .then(result => {
+                        if (result.payload.status === 200) {
+                            setSnackbarMessage("Profile picture updated successfully");
+                            setIsSnackbarSuccessful(true);
+                            setOpenSnackbar(true);
+                        } else {
+                            setSnackbarMessage('Failed to update profile picture: ' + result.payload.message);
+                            setIsSnackbarSuccessful(false);
+                            setOpenSnackbar(true);
+                        }
+                    })
+                    .catch(error => {
+                        setSnackbarMessage('Failed to update profile picture: ' + error);
+                        setIsSnackbarSuccessful(false);
+                        setOpenSnackbar(true);
+                    });
+            })
+    }
+
+    const handleInputFile = (files: FileList | null) => {
+        if (files && files.length > 0) {
+            uploadToCloudinary(files[0]);
+        } else {
+            setSnackbarMessage('No file was selected to upload.');
+            setIsSnackbarSuccessful(false);
+            setOpenSnackbar(true);
+        }
     }
 
     return (
@@ -30,9 +93,11 @@ const Profile: React.FC<ProfileProps> = ({handleCloseOpenProfile}) => {
             </div>
             <div className='flex flex-col justify-center items-center my-12'>
                 <label htmlFor='imgInput'>
-                    <img className='rounded-full w-[50vw] md:w-[15vh] cursor-pointer' src='https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541' />
+                    <div className='w-48 h-48 overflow-hidden relative'>
+                        <img className='rounded-full cursor-pointer w-full h-full object-cover' src={tempPicture} />
+                    </div>
                 </label>
-                <input type='file' id='imgInput' className='hidden' />
+                <input type='file' id='imgInput' className='hidden' onChange={(e) => handleInputFile(e.target.files)} accept='image/png, image/jpeg' />
             </div>
 
             <div className='px-8'>
@@ -54,7 +119,7 @@ const Profile: React.FC<ProfileProps> = ({handleCloseOpenProfile}) => {
                                 value={fullName}
                                 onChange={e => setFullName(e.target.value)}
                             />
-                            <BsCheck className='text-3xl cursor-pointer' onClick={handleCheckClick}/>
+                            <BsCheck className='text-3xl cursor-pointer' onClick={handleCheckClick} />
                         </div>
                     </div>
                 }
@@ -63,6 +128,16 @@ const Profile: React.FC<ProfileProps> = ({handleCloseOpenProfile}) => {
                 </div>
             </div>
 
+            <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleSnackbar}>
+                <Alert
+                    onClose={handleSnackbar}
+                    severity={`${isSnackbarSuccessful ? 'success' : 'error'}`}
+                    variant="filled"
+                    sx={{ width: '100%' }}
+                >
+                    {snackbarMessage}
+                </Alert>
+            </Snackbar>
 
         </div>
     )

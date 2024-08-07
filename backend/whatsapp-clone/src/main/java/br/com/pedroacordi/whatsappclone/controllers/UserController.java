@@ -38,11 +38,9 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse> updateUser(@PathVariable Long id, @RequestBody User user){
+    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user){
         user.setId(id);
-        service.update(user);
-        ApiResponse response = new ApiResponse("User updated successfully", true);
-        return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>( service.update(user), HttpStatus.OK );
     }
 
 }

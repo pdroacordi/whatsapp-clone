@@ -87,7 +87,6 @@ export const searchForUser = createAsyncThunk(
                 },
             });
             const data = await response.json();
-            console.log(data);
             return data;
         } catch (error: any) {
             return rejectWithValue(error.message);
@@ -102,14 +101,13 @@ export const updateUser = createAsyncThunk(
             const response = await fetch(`${BASE_API_URL}/api/users/${user.id}`, {
                 method: 'PUT',
                 headers: {
+                    "Content-Type": "application/json",
                     "Authorization": `Bearer ${token}`
                 },
                 body: JSON.stringify(user)
             });
             const data = await response.json();
-            if (response.status !== 202) {
-                throw new Error(data.message || 'Could not update user.');
-            }
+            data.status = response.status;
             return data;
         } catch (error: any) {
             return rejectWithValue(error.message);
@@ -188,6 +186,19 @@ const userSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload;
                 state.searchUsers = null;
+            })
+            //Update user
+            .addCase(updateUser.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(updateUser.fulfilled, (state, action: PayloadAction<any>) => {
+                state.loading = false;
+                state.curUser = action.payload;
+            })
+            .addCase(updateUser.rejected, (state, action: PayloadAction<any>) => {
+                state.loading = false;
+                state.error = action.payload;
             })
             //Logout
             .addCase(logout.fulfilled, (state) => {
