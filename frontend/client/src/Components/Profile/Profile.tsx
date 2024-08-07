@@ -8,6 +8,7 @@ import { useDispatch } from 'react-redux';
 import { updateUser } from '../../Redux/features/user/userSlice';
 import { Alert, Snackbar } from '@mui/material';
 import { User } from '../../Models/User';
+import { AiFillCamera } from 'react-icons/ai';
 
 interface ProfileProps {
     handleCloseOpenProfile: () => void;
@@ -93,8 +94,11 @@ const Profile: React.FC<ProfileProps> = ({ handleCloseOpenProfile }) => {
             </div>
             <div className='flex flex-col justify-center items-center my-12'>
                 <label htmlFor='imgInput'>
-                    <div className='w-48 h-48 overflow-hidden relative'>
-                        <img className='rounded-full cursor-pointer w-full h-full object-cover' src={tempPicture} />
+                    <div className='w-48 h-48 overflow-hidden relative group cursor-pointer'>
+                        <img className='rounded-full w-full h-full object-cover' src={tempPicture} />
+                        <div className='rounded-full absolute inset-0 bg-black bg-opacity-50 flex justify-center items-center group-hover:opacity-100 opacity-0 transition-opacity duration-100'>
+                            <AiFillCamera className='text-5xl text-white'/>
+                        </div>
                     </div>
                 </label>
                 <input type='file' id='imgInput' className='hidden' onChange={(e) => handleInputFile(e.target.files)} accept='image/png, image/jpeg' />
