@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import { AppDispatch, RootState } from '../../Redux/store';
 import { unwrapResult } from '@reduxjs/toolkit';
 import { getCurrentUser, loginUser, saveToken } from '../../Redux/features/user/userSlice';
-import { UserRequest } from '../../Request/UserRequest';
 
 interface AuthObject {
     email: string;
@@ -26,7 +25,7 @@ const SignIn = () => {
         e.preventDefault();
 
         try {
-            const actionResult = await dispatch(loginUser(getUserRequestFromInputData()));
+            const actionResult = await dispatch(loginUser({id:0, email: inputData.email, password: inputData.password}));
             const response = unwrapResult(actionResult);
             if (response.status == 202) {
                 setIsSnackbarSuccessful(true);
@@ -61,11 +60,6 @@ const SignIn = () => {
 
     const handleSnackbar = () => {
         setOpenSnackbar(!openSnackbar);
-    }
-
-    function getUserRequestFromInputData(): UserRequest {
-        let userReq: UserRequest = { user: { email: inputData.email, password: inputData.password } }
-        return userReq;
     }
 
     return (

@@ -1,28 +1,28 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { BASE_API_URL } from '../../../Config/api';
 import { Chat } from '../../../Models/Chat';
-import { UserRequest } from '../../../Request/UserRequest';
 import { GroupChatRequest, PrivateChatRequest } from '../../../Request/ChatRequests';
+import { User } from '../../../Models/User';
 
 interface ChatState {
-    chats: Chat[] | null;
-    createdChat : Chat | null;
-    createdGroup : Chat | null;
+    chats: Chat[];
+    createdChat: Chat | null;
+    createdGroup: Chat | null;
     loading: boolean;
     error: string | null;
 }
 
 const initialState: ChatState = {
     chats: [],
-    createdChat : null,
-    createdGroup : null,
+    createdChat: null,
+    createdGroup: null,
     loading: false,
     error: null,
 };
 
 export const createChat = createAsyncThunk(
     'chat/create',
-    async ({chat, token}:{chat: PrivateChatRequest, token: string}, { rejectWithValue }) => {
+    async ({ chat, token }: { chat: PrivateChatRequest, token: string }, { rejectWithValue }) => {
         try {
             const response = await fetch(`${BASE_API_URL}/api/chats/private`, {
                 method: 'POST',
@@ -43,16 +43,17 @@ export const createChat = createAsyncThunk(
 
 export const getUserChats = createAsyncThunk(
     'chat/getUsers',
-    async (user : UserRequest, { rejectWithValue }) => {
+    async ({ user, token }: { user: User, token: string }, { rejectWithValue }) => {
         try {
-            const response = await fetch(`${BASE_API_URL}/api/chats/user/${user.user.id}`, {
+            const response = await fetch(`${BASE_API_URL}/api/chats/user/${user.id}`, {
                 method: 'GET',
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Bearer ${user.token}`
+                    "Authorization": `Bearer ${token}`
                 },
             });
             const data = await response.json();
+            console.log(data);
             data.status = response.status;
             return data;
         } catch (error: any) {
@@ -63,7 +64,7 @@ export const getUserChats = createAsyncThunk(
 
 export const createGroup = createAsyncThunk(
     'group/create',
-    async ({chat, token}:{chat: GroupChatRequest, token: string}, { rejectWithValue }) => {
+    async ({ chat, token }: { chat: GroupChatRequest, token: string }, { rejectWithValue }) => {
         try {
             const response = await fetch(`${BASE_API_URL}/api/chats/group`, {
                 method: 'POST',

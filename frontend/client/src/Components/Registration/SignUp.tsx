@@ -2,7 +2,6 @@ import { Alert, Snackbar } from '@mui/material';
 import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { UserRequest } from '../../Request/UserRequest';
 import { getCurrentUser, registerUser, saveToken } from '../../Redux/features/user/userSlice';
 import { AppDispatch, RootState } from '../../Redux/store';
 import { unwrapResult } from '@reduxjs/toolkit';
@@ -33,7 +32,7 @@ const SignUp = () => {
         e.preventDefault();
 
         try {
-            const actionResult = await dispatch(registerUser(getUserRequestFromInputData()));
+            const actionResult = await dispatch(registerUser({id:0, email: inputData.email, password: inputData.password, fullName: inputData.fullName}));
             const response = unwrapResult(actionResult);
             if (response.status == 201) {
                 setIsSnackbarSuccessful(true);
@@ -54,11 +53,6 @@ const SignUp = () => {
 
     const handleSnackbar = () => {
         setOpenSnackbar(!openSnackbar);
-    }
-
-    function getUserRequestFromInputData(): UserRequest {
-        let userReq: UserRequest = { user: { email: inputData.email, fullName: inputData.fullName, password: inputData.password } }
-        return userReq;
     }
 
     useEffect(() => {

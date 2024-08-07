@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { TbCircleDashed } from 'react-icons/tb'
-import { BiCommentDetail } from 'react-icons/bi'
+import { BiCommentDetail, BiDownArrow, BiPlus } from 'react-icons/bi'
 import { AiOutlineSearch } from 'react-icons/ai'
 import { BsEmojiSmile, BsFilter, BsMicFill, BsThreeDotsVertical } from 'react-icons/bs'
 import { FaChevronLeft } from "react-icons/fa6";
@@ -10,26 +9,40 @@ import { MessageCard } from '../MessageCard/MessageCard'
 import './HomePage.css'
 import { useNavigate } from 'react-router-dom'
 import Profile from '../Profile/Profile'
-import { Menu, MenuItem } from '@mui/material'
+import { Alert, Menu, MenuItem, Snackbar } from '@mui/material'
 import CreateGroup from '../Group/CreateGroup'
 import { useDispatch, useSelector } from 'react-redux'
-import { getCurrentUser, logout } from '../../Redux/features/user/userSlice'
+import { getCurrentUser, logout, searchForUser } from '../../Redux/features/user/userSlice'
 import { AppDispatch, RootState } from '../../Redux/store'
+import { createChat, getUserChats } from '../../Redux/features/chat/chatSlice'
+import { PrivateChatRequest } from '../../Request/ChatRequests'
+import { Chat } from '../../Models/Chat'
+import { createMessage, getAllMessagesFromChat } from '../../Redux/features/message/messageSlice';
+import { MessageRequest } from '../../Request/MessageRequest';
 
 
 const HomePage = () => {
     const [queries, setQueries] = useState<string | null>(null);
-    const [currentChat, setCurrentChat] = useState<boolean | false>(false);
+    const [currentChat, setCurrentChat] = useState<Chat | null>(null);
     const [content, setContent] = useState<string | "">("");
     const [isProfileOpen, setIsProfileOpen] = useState<boolean | false>(false);
     const [profileAnimation, setProfileAnimation] = useState<string | ''>('');
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const [isCreateGroupOpen, setIsCreateGroupOpen] = useState<boolean | false>(false);
+
+    const [openSnackbar, setOpenSnackbar] = useState<boolean>(false);
+    const [snackbarMessage, setSnackbarMessage] = useState<string | ''>('');
+    const [isSnackbarSuccessful, setIsSnackbarSuccessful] = useState<boolean>(true);
+
+    const { curUser, searchUsers } = useSelector((state: RootState) => state.user);
+    const { chats } = useSelector((state: RootState) => state.chat);
+    const { messages } = useSelector((state: RootState) => state.message);
+
+
     const navigate = useNavigate();
     const open = Boolean(anchorEl);
     const dispatch = useDispatch<AppDispatch>();
-    const { curUser } = useSelector((state: RootState) => state.user);
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token') || '';
 
 
     const handleClickMenu = (e: any) => {
@@ -40,20 +53,67 @@ const HomePage = () => {
     };
 
     const handleSearch = (searchValue: string) => {
-
+        if (searchValue === '')
+            return;
+        if (token !== null)
+            dispatch(searchForUser({ query: searchValue, page: 0, token: token }))
     }
 
-    const handleClickOnChatCard = () => {
-        setCurrentChat(true);
+    const handleSeeMoreClick = () => {
+        if (queries === '')
+            return;
+        if (token !== null && queries !== null) {
+            const page = searchUsers?.number ?? 0 + 1
+            dispatch(searchForUser({ query: queries, page: page, token: token }))
+        }
+    }
+
+    const handleClickOnChatCard = (userId: number) => {
+        const chatRequest: PrivateChatRequest = { reqUserId: curUser?.id, recUserId: userId };
+        dispatch(createChat({ chat: chatRequest, token: token }))
+            .then(result => {
+                if (result.payload.status === 201) {
+                    setQueries('');
+                    setCurrentChat(result.payload);
+                } else {
+                    setSnackbarMessage('Failed to create chat: ' + result.payload.message);
+                    setIsSnackbarSuccessful(false);
+                    setOpenSnackbar(true);
+                }
+            })
+            .catch(error => {
+                setSnackbarMessage('Failed to create chat: ' + error);
+                setIsSnackbarSuccessful(false);
+                setOpenSnackbar(true);
+            });
+    };
+
+    const handleCurrentChat = (chat: Chat) => {
+        setCurrentChat(chat);
     }
 
     const handleBackFromChatClick = () => {
-        setCurrentChat(false);
+        setCurrentChat(null);
     }
 
     const handleCreateNewMessage = () => {
-
+        const message: MessageRequest = { userId: curUser?.id ?? 0, chatId: currentChat?.id ?? 0, content: content }
+        dispatch(createMessage({ message, token }))
+            .then(result => {
+                if (result.payload.status !== 200) {
+                    setSnackbarMessage('Failed to create chat: ' + result.payload.message);
+                    setIsSnackbarSuccessful(false);
+                    setOpenSnackbar(true);
+                    return;
+                }
+            })
+            .catch(error => {
+                setSnackbarMessage('Failed to create chat: ' + error);
+                setIsSnackbarSuccessful(false);
+                setOpenSnackbar(true);
+            });
     }
+
 
     const handleCloseOpenProfile = () => {
         if (isProfileOpen) {
@@ -85,6 +145,10 @@ const HomePage = () => {
         dispatch(logout());
     }
 
+    const handleSnackbar = () => {
+        setOpenSnackbar(!openSnackbar);
+    }
+
     useEffect(() => {
         if (isProfileOpen) {
             setProfileAnimation('profile-animate-in');
@@ -92,14 +156,66 @@ const HomePage = () => {
     }, [isProfileOpen]);
 
     useEffect(() => {
-        if(curUser == null){
+        if (curUser == null) {
             navigate('/signin');
         }
-    },[curUser]);
+    }, [curUser]);
 
     useEffect(() => {
-        if(token) dispatch(getCurrentUser(token))
+        dispatch(getCurrentUser(token))
+            .then(result => {
+                if (result.payload.status !== 200) {
+                    setSnackbarMessage('Failed to get token: ' + result.payload.message);
+                    setIsSnackbarSuccessful(false);
+                    setOpenSnackbar(true);
+                    return;
+                }
+            })
+            .catch(error => {
+                setSnackbarMessage('Failed to get token: ' + error);
+                setIsSnackbarSuccessful(false);
+                setOpenSnackbar(true);
+            });
     }, [token]);
+
+    useEffect(() => {
+        if (curUser === null) return
+
+        dispatch(getUserChats({ user: curUser, token: token }))
+            .then(result => {
+                if (result.payload.status !== 200) {
+                    setSnackbarMessage('Failed to get user: ' + result.payload.message);
+                    setIsSnackbarSuccessful(false);
+                    setOpenSnackbar(true);
+                    return;
+                }
+            })
+            .catch(error => {
+                setSnackbarMessage('Failed to get user: ' + error);
+                setIsSnackbarSuccessful(false);
+                setOpenSnackbar(true);
+            });
+    }, [])
+
+    useEffect(() => {
+        if (currentChat === null) return
+
+        dispatch(getAllMessagesFromChat({ chat: currentChat, token: token }))
+            .then(result => {
+                if (result.payload.status !== 200) {
+                    setSnackbarMessage('Failed to get messages: ' + result.payload.message);
+                    setIsSnackbarSuccessful(false);
+                    setOpenSnackbar(true);
+                    return;
+                }
+                console.log(result.payload);
+            })
+            .catch(error => {
+                setSnackbarMessage('Failed to get messages: ' + error);
+                setIsSnackbarSuccessful(false);
+                setOpenSnackbar(true);
+            });
+    }, [currentChat])
 
     return (
         <div className='flex flex-wrap min-h-screen'>
@@ -124,7 +240,7 @@ const HomePage = () => {
                         {!isProfileOpen && !isCreateGroupOpen && <div className='flex flex-col flex-1 '>
                             <div className='flex justify-between items-center p-3'>
                                 <div onClick={handleCloseOpenProfile} className='flex items-center space-x-3 cursor-pointer'>
-                                    <img className='rounded-full w-10 h-10' src='https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541'></img>
+                                    <img className='rounded-full w-10 h-10' src={ curUser?.profilePicture ? curUser.profilePicture : 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541'}></img>
                                     <p>{curUser?.fullName}</p>
                                 </div>
                                 <div className='space-x-3 text-2xl flex items-center'>
@@ -171,11 +287,36 @@ const HomePage = () => {
                             </div>
 
                             <div className='chats flex-1 bg-white overflow-y-auto max-h-screen'>
-                                {queries && [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].map((item) =>
-                                    <div onClick={handleClickOnChatCard} className='hover:bg-gray-100'>
-                                        <ChatCard isChat={true} />
+                                {(!queries && chats.length > 0) && chats?.map((item) =>
+                                    <div key={item.id} className='hover:bg-gray-100' onClick={() => handleCurrentChat(item)}>
+                                        {
+                                            item.isGroupChat
+                                                ?
+                                                <ChatCard
+                                                    isChat={true}
+                                                    chatName={item.chatName ?? ''}
+                                                    chatImage={item.chatImage ?? ''}
+
+                                                />
+                                                :
+                                                <ChatCard
+                                                    isChat={true}
+                                                    chatName={(curUser?.id === item.users[0].id ? item.users[1].fullName : item.users[0].fullName) ?? ''}
+                                                    chatImage={(curUser?.id === item.users[0].id ? item.users[1].profilePicture : item.users[0].profilePicture) ?? ''}
+                                                />
+                                        }
                                     </div>
                                 )}
+                                {queries && searchUsers?.content.map((item) =>
+                                    <div key={item.id} onClick={() => handleClickOnChatCard(item.id)} className='hover:bg-gray-100'>
+                                        <ChatCard isChat={false} chatName={item.fullName ?? ''} chatImage={''} />
+                                    </div>
+                                )}
+                                {(queries && searchUsers?.last === false) &&
+                                    <div className='flex w-full justify-center items-center'>
+                                        <button className='flex justify-center items-center rounded-2xl bg-green-500 p-2 text-white' onClick={handleSeeMoreClick}><BiDownArrow />See more</button>
+                                    </div>
+                                }
                             </div>
                         </div>}
                     </div>
@@ -194,8 +335,28 @@ const HomePage = () => {
                             <div className='flex justify-between'>
                                 <div className='py-3 space-x-4 flex items-center px-3'>
                                     <FaChevronLeft className='cursor-pointer block  md:hidden' onClick={handleBackFromChatClick} />
-                                    <img className='w-10 h-10 rounded-full' src='https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png' />
-                                    <p>Fullname</p>
+
+                                    {
+                                        currentChat.isGroupChat
+                                            ?
+                                            <img className='w-10 h-10 rounded-full' src={currentChat.chatImage || 'https://www.shareicon.net/data/128x128/2016/01/13/702503_users_512x512.png'} />
+                                            :
+                                            <img className='w-10 h-10 rounded-full' src={(currentChat.users[0].id === curUser?.id
+                                                ? currentChat.users[1].profilePicture
+                                                : currentChat.users[0].profilePicture) ??
+                                                'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png'}
+                                            />
+                                    }
+                                    {
+                                        currentChat.isGroupChat
+                                            ?
+                                            <p>{currentChat.chatName}</p>
+                                            :
+                                            <p>{currentChat.users[0].id === curUser?.id
+                                                ? currentChat.users[1].fullName
+                                                : currentChat.users[0].fullName}
+                                            </p>
+                                    }
                                 </div>
                                 <div className='py-3 space-x-4 flex items-center px-3'>
                                     <AiOutlineSearch />
@@ -206,7 +367,7 @@ const HomePage = () => {
                     </div>
                     <div className='flex-1 px-10 h-[84%] overflow-y-scroll'>
                         <div className='space-y-1 flex flex-col justify-center  py-2'>
-                            {[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, , 1, 1, , 1, 1].map((item, i) => <MessageCard content="hi" isReqUserMessage={i % 2 !== 0} />)}
+                            {messages.map((item) => <MessageCard key={item.id} content={item.content??''} isReqUserMessage={item.user?.id === curUser?.id} />)}
                         </div>
                     </div>
 
@@ -220,6 +381,16 @@ const HomePage = () => {
                     </div>
                 </div>}
             </div>
+            <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleSnackbar}>
+                <Alert
+                    onClose={handleSnackbar}
+                    severity={`${isSnackbarSuccessful ? 'success' : 'error'}`}
+                    variant="filled"
+                    sx={{ width: '100%' }}
+                >
+                    {snackbarMessage}
+                </Alert>
+            </Snackbar>
         </div>
     )
 }

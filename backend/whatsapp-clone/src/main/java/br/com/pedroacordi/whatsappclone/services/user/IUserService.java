@@ -14,6 +14,6 @@ public interface IUserService {
 
     public User update(User user) throws UserException;
 
-    public Page<User> searchUser(String name, int page);
+    public Page<User> searchUser(String name, User requestingUser, int page);
 
 }

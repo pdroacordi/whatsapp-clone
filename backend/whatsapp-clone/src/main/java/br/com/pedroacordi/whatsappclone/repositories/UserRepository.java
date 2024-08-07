@@ -13,6 +13,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     public User findByEmail(String email);
 
-    @Query("SELECT u FROM User u WHERE LOWER(u.fullName) LIKE LOWER(CONCAT('%', :keyword, '%')) or LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%'))")
-    public Page<User> findUserByEmailOrUsername(@Param("keyword") String keyword, Pageable pageable);
+    @Query("SELECT u FROM User u WHERE (LOWER(u.fullName) LIKE LOWER(CONCAT('%', :keyword, '%')) or LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND u.id != :reqUserId")
+    public Page<User> findUserByEmailOrUsername(@Param("keyword") String keyword, @Param("reqUserId") Long requestingUserId, Pageable pageable);
 }

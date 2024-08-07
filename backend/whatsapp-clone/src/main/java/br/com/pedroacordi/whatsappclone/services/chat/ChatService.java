@@ -34,7 +34,7 @@ public class ChatService implements IChatService{
             return existingChat;
 
         Chat newChat = new Chat();
-        newChat.setCreatedBy( recUser );
+        newChat.setCreatedBy( reqUser );
         newChat.getUsers().add(reqUser);
         newChat.getUsers().add(recUser);
         newChat.setGroupChat(false);

@@ -2,6 +2,7 @@ package br.com.pedroacordi.whatsappclone.controllers;
 
 import br.com.pedroacordi.whatsappclone.models.User;
 import br.com.pedroacordi.whatsappclone.response.ApiResponse;
+import br.com.pedroacordi.whatsappclone.security.TokenUtil;
 import br.com.pedroacordi.whatsappclone.services.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,7 +18,7 @@ public class UserController {
     private UserService service;
 
     @GetMapping("/")
-    public ResponseEntity<User> getUserByToken(@RequestHeader("Authorization") String token){
+    public ResponseEntity<User> getUserByToken(@RequestHeader(TokenUtil.JWT_HEADER) String token){
         User user = service.findUserProfile(token);
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
@@ -30,8 +31,10 @@ public class UserController {
 
     @GetMapping("/search")
     public ResponseEntity<Page<User>> getUserByNameOrEmail(@RequestParam(name="value") String value,
-                                                           @RequestParam(name="p", defaultValue = "0") int page){
-        return ResponseEntity.ok(service.searchUser(value, page));
+                                                           @RequestParam(name="p", defaultValue = "0") int page,
+                                                           @RequestHeader(TokenUtil.JWT_HEADER) String token){
+        User user = service.findUserProfile(token);
+        return ResponseEntity.ok(service.searchUser(value, user, page));
     }
 
     @PutMapping("/{id}")

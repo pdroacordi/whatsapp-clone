@@ -17,10 +17,10 @@ public class Chat implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "chat_name", nullable = false)
+    @Column(name = "chat_name")
     private String chatName;
 
-    @Column(name= "chat_image", nullable = false)
+    @Column(name= "chat_image")
     private String chatImage;
 
     @Column(name="is_group")

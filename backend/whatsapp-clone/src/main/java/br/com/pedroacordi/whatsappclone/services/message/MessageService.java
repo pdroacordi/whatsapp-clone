@@ -39,7 +39,7 @@ public class MessageService implements IMessageService{
         message.setContent( request.getContent() );
         message.setTimestamp(LocalDateTime.now());
 
-        return message;
+        return repository.save(message);
     }
 
     @Override

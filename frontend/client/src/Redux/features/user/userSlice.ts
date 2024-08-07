@@ -1,30 +1,32 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { BASE_API_URL } from '../../../Config/api';
-import { UserRequest } from '../../../Request/UserRequest';
 import { User } from '../../../Models/User';
+import { UserPageable } from '../../../Models/Pageable';
 
 interface UserState {
     curUser: User | null;
+    searchUsers: UserPageable | null;
     loading: boolean;
     error: string | null;
 }
 
 const initialState: UserState = {
     curUser: null,
+    searchUsers: null,
     loading: false,
     error: null,
 };
 
 export const registerUser = createAsyncThunk(
     'user/register',
-    async (userData: UserRequest, { rejectWithValue }) => {
+    async (user : User, { rejectWithValue }) => {
         try {
             const response = await fetch(`${BASE_API_URL}/auth/signup`, {
                 method: 'POST',
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(userData.user)
+                body: JSON.stringify(user)
             });
             const data = await response.json();
             data.status = response.status;
@@ -37,14 +39,14 @@ export const registerUser = createAsyncThunk(
 
 export const loginUser = createAsyncThunk(
     'user/login',
-    async (userData: UserRequest, { rejectWithValue }) => {
+    async (user : User, { rejectWithValue }) => {
         try {
             const response = await fetch(`${BASE_API_URL}/auth/signin`, {
                 method: 'POST',
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(userData.user)
+                body: JSON.stringify(user)
             });
             const data = await response.json();
             data.status = response.status;
@@ -66,6 +68,7 @@ export const getCurrentUser = createAsyncThunk(
                 },
             });
             const data = await response.json();
+            data.status = response.status;
             return data;
         } catch (error: any) {
             return rejectWithValue(error.message);
@@ -75,18 +78,16 @@ export const getCurrentUser = createAsyncThunk(
 
 export const searchForUser = createAsyncThunk(
     'user/searchuser',
-    async (userData: UserRequest, { rejectWithValue }) => {
+    async ({query, page, token}:{query:string, page:number, token:string}, { rejectWithValue }) => {
         try {
-            const response = await fetch(`${BASE_API_URL}/api/users/search?value=${userData.query}&p=${userData.page}`, {
+            const response = await fetch(`${BASE_API_URL}/api/users/search?value=${query}&p=${page}`, {
                 method: 'GET',
                 headers: {
-                    "Authorization": `Bearer ${userData.token}`
+                    "Authorization": `Bearer ${token}`
                 },
             });
             const data = await response.json();
-            if (response.ok) {
-                throw new Error(data.message || 'Could not get user.');
-            }
+            console.log(data);
             return data;
         } catch (error: any) {
             return rejectWithValue(error.message);
@@ -96,14 +97,14 @@ export const searchForUser = createAsyncThunk(
 
 export const updateUser = createAsyncThunk(
     'user/updateuser',
-    async (userData: UserRequest, { rejectWithValue }) => {
+    async ({user, token}:{user: User, token: string}, { rejectWithValue }) => {
         try {
-            const response = await fetch(`${BASE_API_URL}/api/users/${userData.user.id}`, {
+            const response = await fetch(`${BASE_API_URL}/api/users/${user.id}`, {
                 method: 'PUT',
                 headers: {
-                    "Authorization": `Bearer ${userData.token}`
+                    "Authorization": `Bearer ${token}`
                 },
-                body: JSON.stringify(userData.user)
+                body: JSON.stringify(user)
             });
             const data = await response.json();
             if (response.status !== 202) {
@@ -172,6 +173,21 @@ const userSlice = createSlice({
             .addCase(getCurrentUser.rejected, (state, action: PayloadAction<any>) => {
                 state.loading = false;
                 state.error = action.payload;
+            })
+            //Search for user
+            .addCase(searchForUser.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+                state.searchUsers = null;
+            })
+            .addCase(searchForUser.fulfilled, (state, action: PayloadAction<any>) => {
+                state.loading = false;
+                state.searchUsers = action.payload;
+            })
+            .addCase(searchForUser.rejected, (state, action: PayloadAction<any>) => {
+                state.loading = false;
+                state.error = action.payload;
+                state.searchUsers = null;
             })
             //Logout
             .addCase(logout.fulfilled, (state) => {

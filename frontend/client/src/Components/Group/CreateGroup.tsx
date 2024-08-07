@@ -56,7 +56,7 @@ const CreateGroup: React.FC<CreateGroupProps> = ({ handleCloseOpenCreateGroup })
                     <div className='bg-white overflow-y-auto flex-grow'>
                         {query && [{ "id": 1 }, { "id": 2 }, { "id": 2 }, { "id": 2 }, { "id": 2 }, { "id": 2 }, { "id": 2 }, { "id": 2 }, { "id": 2 }, { "id": 2 }, { "id": 2 }, { "id": 2 }, { "id": 2 }, { "id": 2 }, { "id": 2 }].map((item) =>
                             <div onClick={() => handleAddMember(item)} key={item?.id}>
-                                <ChatCard isChat={false}/>
+                               {/* <ChatCard isChat={false}/> */}
                             </div>)}
                     </div>
                     <div className='bottom-10 flex items-center justify-center bg-white border py-10'>

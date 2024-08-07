@@ -69,12 +69,12 @@ public class UserService implements IUserService{
     }
 
     @Override
-    public Page<User> searchUser(String name, int page) {
+    public Page<User> searchUser(String name, User requestingUser, int page) {
 
         if( name == null || name.isEmpty() )
             throw new UserException("Invalid search");
 
         Pageable pageable = PageRequest.of(page, ELEMENTS_PER_PAGE);
-        return repository.findUserByEmailOrUsername(name, pageable);
+        return repository.findUserByEmailOrUsername(name, requestingUser.getId(), pageable);
     }
 }

@@ -6,7 +6,7 @@ import { Chat } from '../../../Models/Chat';
 
 interface MessageState {
     newMessage: Message | null;
-    messages: Message[] | null;
+    messages: Message[];
     loading: boolean;
     error: string | null;
 }
