@@ -19,6 +19,7 @@ import { PrivateChatRequest } from '../../Request/ChatRequests'
 import { Chat } from '../../Models/Chat'
 import { createMessage, getAllMessagesFromChat } from '../../Redux/features/message/messageSlice';
 import { MessageRequest } from '../../Request/MessageRequest';
+import { User } from '../../Models/User';
 
 
 const HomePage = () => {
@@ -37,6 +38,8 @@ const HomePage = () => {
     const { curUser, searchUsers } = useSelector((state: RootState) => state.user);
     const { chats } = useSelector((state: RootState) => state.chat);
     const { messages } = useSelector((state: RootState) => state.message);
+
+    const [resultUsers, setResultUsers] = useState<User[]>([]);
 
 
     const navigate = useNavigate();
@@ -57,14 +60,38 @@ const HomePage = () => {
             return;
         if (token !== null)
             dispatch(searchForUser({ query: searchValue, page: 0, token: token }))
+                .then(result => {
+                    if (result.payload.status !== 200) {
+                        setSnackbarMessage('Failed to search: ' + result.payload.message);
+                        setIsSnackbarSuccessful(false);
+                        setOpenSnackbar(true);
+                    }
+                })
+                .catch(error => {
+                    setSnackbarMessage('Failed to search: ' + error);
+                    setIsSnackbarSuccessful(false);
+                    setOpenSnackbar(true);
+                });
     }
 
     const handleSeeMoreClick = () => {
         if (queries === '')
             return;
         if (token !== null && queries !== null) {
-            const page = searchUsers?.number ?? 0 + 1
-            dispatch(searchForUser({ query: queries, page: page, token: token }))
+            const page = searchUsers?.number ?? 0
+            dispatch(searchForUser({ query: queries, page: page+1, token: token }))
+                .then(result => {
+                    if (result.payload.status !== 200) {
+                        setSnackbarMessage('Failed to search: ' + result.payload.message);
+                        setIsSnackbarSuccessful(false);
+                        setOpenSnackbar(true);
+                    }
+                })
+                .catch(error => {
+                    setSnackbarMessage('Failed to search: ' + error);
+                    setIsSnackbarSuccessful(false);
+                    setOpenSnackbar(true);
+                });
         }
     }
 
@@ -216,6 +243,24 @@ const HomePage = () => {
             });
     }, [currentChat])
 
+    useEffect(() => {
+        if(queries === ''){
+            setResultUsers([]);
+            return;
+        }
+        const existingUserIds = new Set(resultUsers.map(user => user.id));
+    const newUsers = resultUsers.slice(); // Cria uma cópia do array de usuários
+
+    searchUsers?.content.forEach(user => {
+        if (!existingUserIds.has(user.id)) {
+            newUsers.push(user); // Adiciona o usuário se o ID não estiver no Set
+            existingUserIds.add(user.id); // Adiciona o ID ao Set para futuras verificações
+        }
+    });
+
+    setResultUsers(newUsers);
+    }, [searchUsers, queries])
+
     return (
         <div className='flex flex-wrap min-h-screen'>
             <div className='flex bg-[#f0f2f5] h-[100%] w-full '>
@@ -239,7 +284,9 @@ const HomePage = () => {
                         {!isProfileOpen && !isCreateGroupOpen && <div className='flex flex-col flex-1 '>
                             <div className='flex justify-between items-center p-3'>
                                 <div onClick={handleCloseOpenProfile} className='flex items-center space-x-3 cursor-pointer'>
-                                    <img className='rounded-full w-10 h-10' src={ curUser?.profilePicture ? curUser.profilePicture : 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541'}></img>
+                                    <div className='w-10 h-10 overflow-hidden relative group cursor-pointer'>
+                                        <img className='rounded-full w-full h-full object-cover' src={curUser?.profilePicture ? curUser.profilePicture : 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541'}></img>
+                                    </div>
                                     <p>{curUser?.fullName}</p>
                                 </div>
                                 <div className='space-x-3 text-2xl flex items-center'>
@@ -306,9 +353,9 @@ const HomePage = () => {
                                         }
                                     </div>
                                 )}
-                                {queries && searchUsers?.content.map((item) =>
+                                {queries && resultUsers.map((item) =>
                                     <div key={item.id} onClick={() => handleClickOnChatCard(item.id)} className='hover:bg-gray-100'>
-                                        <ChatCard isChat={false} chatName={item.fullName ?? ''} chatImage={''} />
+                                        <ChatCard isChat={false} chatName={item.fullName ?? ''} chatImage={item.profilePicture ?? ''} />
                                     </div>
                                 )}
                                 {(queries && searchUsers?.last === false) &&
@@ -334,18 +381,19 @@ const HomePage = () => {
                             <div className='flex justify-between'>
                                 <div className='py-3 space-x-4 flex items-center px-3'>
                                     <FaChevronLeft className='cursor-pointer block  md:hidden' onClick={handleBackFromChatClick} />
-
-                                    {
-                                        currentChat.isGroupChat
-                                            ?
-                                            <img className='w-10 h-10 rounded-full' src={currentChat.chatImage || 'https://www.shareicon.net/data/128x128/2016/01/13/702503_users_512x512.png'} />
-                                            :
-                                            <img className='w-10 h-10 rounded-full' src={(currentChat.users[0].id === curUser?.id
-                                                ? currentChat.users[1].profilePicture
-                                                : currentChat.users[0].profilePicture) ??
-                                                'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png'}
-                                            />
-                                    }
+                                    <div className='w-10 h-10 overflow-hidden relative group cursor-pointer'>
+                                        {
+                                            currentChat.isGroupChat
+                                                ?
+                                                <img className='w-full h-full rounded-full object-cover' src={currentChat.chatImage || 'https://www.shareicon.net/data/128x128/2016/01/13/702503_users_512x512.png'} />
+                                                :
+                                                <img className='w-full h-full rounded-full object-cover' src={(currentChat.users[0].id === curUser?.id
+                                                    ? currentChat.users[1].profilePicture
+                                                    : currentChat.users[0].profilePicture) ??
+                                                    'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png'}
+                                                />
+                                        }
+                                    </div>
                                     {
                                         currentChat.isGroupChat
                                             ?
@@ -366,7 +414,7 @@ const HomePage = () => {
                     </div>
                     <div className='flex-1 px-10 h-[84%] overflow-y-scroll'>
                         <div className='space-y-1 flex flex-col justify-center  py-2'>
-                            {messages.map((item) => <MessageCard key={item.id} content={item.content??''} isReqUserMessage={item.user?.id === curUser?.id} />)}
+                            {messages.map((item) => <MessageCard key={item.id} content={item.content ?? ''} isChatMessage={currentChat.isGroupChat??false} senderName={item.user?.fullName??''} isReqUserMessage={item.user?.id === curUser?.id} />)}
                         </div>
                     </div>
 

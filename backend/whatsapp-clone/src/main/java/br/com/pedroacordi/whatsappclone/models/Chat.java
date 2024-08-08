@@ -1,16 +1,14 @@
 package br.com.pedroacordi.whatsappclone.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
-@Table(name="chat")
+@Table(name = "chat")
 public class Chat implements Serializable {
 
     @Id
@@ -20,10 +18,11 @@ public class Chat implements Serializable {
     @Column(name = "chat_name")
     private String chatName;
 
-    @Column(name= "chat_image")
+    @Column(name = "chat_image")
     private String chatImage;
 
-    @Column(name="is_group")
+    @Column(name = "is_group")
+    @JsonProperty("isGroupChat")
     private boolean isGroupChat;
 
     @ManyToOne
@@ -115,4 +114,27 @@ public class Chat implements Serializable {
     public void setAdmins(Set<User> admins) {
         this.admins = admins;
     }
+
+    public void addUser(User user) {
+        this.users.add(user);
+    }
+
+    public void removeUser(User user) {
+        this.users.remove(user);
+    }
+
+    public void addAdmin(User admin) {
+        this.admins.add(admin);
+    }
+
+    public void removeAdmin(User admin) {
+        this.admins.remove(admin);
+    }
+
+    public void addUsers(Collection<User> newUsers) {
+        if (newUsers != null) {
+            this.users.addAll(newUsers);
+        }
+    }
+
 }

@@ -35,6 +35,26 @@ const Profile: React.FC<ProfileProps> = ({ handleCloseOpenProfile }) => {
 
     const handleCheckClick = () => {
         setFlag(false);
+        if (curUser === null) return;
+        const user: User = { ...curUser, fullName: fullName };
+        dispatch(updateUser({ user: user, token: token }))
+            .then(result => {
+                if (result.payload.status === 200) {
+                    setSnackbarMessage("Name updated successfully");
+                    setIsSnackbarSuccessful(true);
+                    setOpenSnackbar(true);
+                } else {
+                    setSnackbarMessage('Failed to update name: ' + result.payload.message);
+                    setIsSnackbarSuccessful(false);
+                    setOpenSnackbar(true);
+                }
+            })
+            .catch(error => {
+                setSnackbarMessage('Failed to update name: ' + error);
+                setIsSnackbarSuccessful(false);
+                setOpenSnackbar(true);
+            });
+
     }
 
     const handleSnackbar = () => {
@@ -97,7 +117,7 @@ const Profile: React.FC<ProfileProps> = ({ handleCloseOpenProfile }) => {
                     <div className='w-48 h-48 overflow-hidden relative group cursor-pointer'>
                         <img className='rounded-full w-full h-full object-cover' src={tempPicture} />
                         <div className='rounded-full absolute inset-0 bg-black bg-opacity-50 flex justify-center items-center group-hover:opacity-100 opacity-0 transition-opacity duration-100'>
-                            <AiFillCamera className='text-5xl text-white'/>
+                            <AiFillCamera className='text-5xl text-white' />
                         </div>
                     </div>
                 </label>
@@ -122,6 +142,7 @@ const Profile: React.FC<ProfileProps> = ({ handleCloseOpenProfile }) => {
                                 className='flex-grow bg-transparent outline-none truncateName'
                                 value={fullName}
                                 onChange={e => setFullName(e.target.value)}
+                                onKeyDown={(e) => { if (e.key === "Enter"){handleCheckClick()}}}
                             />
                             <BsCheck className='text-3xl cursor-pointer' onClick={handleCheckClick} />
                         </div>

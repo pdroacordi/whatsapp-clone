@@ -10,8 +10,8 @@ interface ChatCardProps {
 const ChatCard: React.FC<ChatCardProps> = ({ isChat, chatName, chatImage }) => {
     return (
         <div className='flex items-center justify-center py-2 px-3 group cursor-pointer'>
-            <div className='w-[10%]'>
-                <img className='h-full w-full rounded-full' src={ chatImage !== '' ? chatImage : 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541'}></img>
+            <div className='w-14 h-14 overflow-hidden'>
+                <img className='h-full w-full rounded-full object-cover' src={ chatImage !== '' ? chatImage : 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541'}></img>
             </div>
 
             <div className='pl-5 w-[90%]'>

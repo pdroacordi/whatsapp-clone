@@ -87,6 +87,8 @@ export const searchForUser = createAsyncThunk(
                 },
             });
             const data = await response.json();
+            data.status = response.status;
+            console.log(data)
             return data;
         } catch (error: any) {
             return rejectWithValue(error.message);

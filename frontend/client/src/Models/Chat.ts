@@ -5,7 +5,7 @@ export interface Chat {
     chatName ? : string;
     chatImage ? : string;
     isGroupChat ? : boolean;
-    createdBy ? : User;
+    createdBy ? : User | null;
     users : User[];
     admins ? : User[];
 }

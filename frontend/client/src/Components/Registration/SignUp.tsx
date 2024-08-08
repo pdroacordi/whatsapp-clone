@@ -34,7 +34,7 @@ const SignUp = () => {
         try {
             const actionResult = await dispatch(registerUser({id:0, email: inputData.email, password: inputData.password, fullName: inputData.fullName}));
             const response = unwrapResult(actionResult);
-            if (response.status == 201) {
+            if (response.status === 201) {
                 setIsSnackbarSuccessful(true);
                 setSnackbarMessage('Account created successfully');
                 saveToken(response.token);

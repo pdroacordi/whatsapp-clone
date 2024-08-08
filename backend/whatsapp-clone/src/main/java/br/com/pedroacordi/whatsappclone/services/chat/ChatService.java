@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -62,6 +63,9 @@ public class ChatService implements IChatService{
 
         User creator = userService.findUserById( request.getCreatorUserId() );
 
+        if(creator == null)
+            throw new ChatException("Creator user not found");
+
         Chat groupChat = new Chat();
         groupChat.setGroupChat(true);
         groupChat.setChatImage(request.getChatImage());
@@ -70,9 +74,15 @@ public class ChatService implements IChatService{
         groupChat.getAdmins().add(creator);
         List<User> users = request.getUserIds().stream()
                 .map(userService::findUserById)
-                .toList();
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
 
-        groupChat.getUsers().addAll(users);
+        if(!users.contains(creator)){
+            users.addFirst(creator);
+        }
+        groupChat.addUsers(users);
+
         return repository.save(groupChat);
     }
 
