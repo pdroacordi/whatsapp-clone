@@ -44,6 +44,9 @@ public class TokenUtil {
     public static Authentication decode(HttpServletRequest request) {
         String token = request.getHeader(JWT_HEADER);
 
+        if(token == null)
+            token = request.getParameter(JWT_HEADER);
+
         if (token == null || !token.startsWith(PREFIX)) {
             return null;
         }

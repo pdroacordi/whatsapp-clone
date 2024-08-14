@@ -19,7 +19,7 @@ public class HttpHandshakeInterceptor implements HandshakeInterceptor {
             return true;
         }
         ServletServerHttpRequest servletRequest = (ServletServerHttpRequest) request;
-        String token = servletRequest.getServletRequest().getParameter("token");
+        String token = servletRequest.getServletRequest().getParameter(TokenUtil.JWT_HEADER);
         Authentication auth = TokenUtil.decodeToken(token);
         if (auth != null) {
             SecurityContextHolder.getContext().setAuthentication(auth);

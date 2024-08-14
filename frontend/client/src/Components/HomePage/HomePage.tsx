@@ -296,9 +296,9 @@ const HomePage = () => {
     ///Chats
     useEffect(() => {
         if (curUser === null) return;
-        webSocketService.stompClient?.subscribe(`/user/${curUser.id}/queue`, (message) => {
+        webSocketService.stompClient?.subscribe(`/user/${curUser.id}/queue`, (payload:any) => {
             try {
-                const response = JSON.parse(message.body);
+                const response = JSON.parse(payload.body);
                 if(response.message !== 'update the chat') return;
                 getAllChatsForUser();
             } catch (error: any) {

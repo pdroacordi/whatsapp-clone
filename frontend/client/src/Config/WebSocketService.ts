@@ -16,8 +16,7 @@ class WebSocketService {
   }
 
   initializeWebSocketConnection() {
-    this.token = this.token.replace("Bearer ", "");
-    const socket = new SockJS(`${this.serverUrl}?token=${this.token}`);
+    const socket = new SockJS(`${this.serverUrl}?Authorization=${this.token}`);
     console.log(`${this.serverUrl}?token=${this.token}`)
     this.stompClient = new Client({
       webSocketFactory: () => socket,
@@ -25,11 +24,11 @@ class WebSocketService {
       onConnect: () => {
         console.log('Connected to WebSocket server');
       },
-      onStompError: (frame) => {
+      onStompError: (frame : any) => {
         console.error('Broker reported error: ' + frame.headers['message']);
         console.error('Additional details: ' + frame.body);
       },
-      debug: (str) => {
+      debug: (str : any) => {
         console.log(str);
       }
     });
