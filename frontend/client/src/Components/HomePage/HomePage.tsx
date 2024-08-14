@@ -20,9 +20,6 @@ import { Chat } from '../../Models/Chat'
 import { createMessage, getAllMessagesFromChat } from '../../Redux/features/message/messageSlice';
 import { MessageRequest } from '../../Request/MessageRequest';
 import { User } from '../../Models/User';
-import SockJS from 'sockjs-client';
-import { BASE_API_URL } from '../../Config/api';
-import { Client, over } from 'stompjs';
 import { Message } from '../../Models/Message';
 
 
@@ -34,7 +31,6 @@ const HomePage = () => {
     const [profileAnimation, setProfileAnimation] = useState<string | ''>('');
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const [isCreateGroupOpen, setIsCreateGroupOpen] = useState<boolean | false>(false);
-    const [shouldUpdateChats, setShouldUpdateChats] = useState(false);
 
     const [openSnackbar, setOpenSnackbar] = useState<boolean>(false);
     const [snackbarMessage, setSnackbarMessage] = useState<string | ''>('');
@@ -50,48 +46,6 @@ const HomePage = () => {
     const open = Boolean(anchorEl);
     const dispatch = useDispatch<AppDispatch>();
     const token = localStorage.getItem('token') || '';
-
-    const [stompClient, setStompClient] = useState<Client>();
-    const [isConnected, setIsConnected] = useState<boolean>(false);
-    const [wsMessages, setWsMessages] = useState<any[]>([]);
-
-    const connect = () => {
-        const socket = new SockJS(`${BASE_API_URL}/ws`);
-        const temp = over(socket);
-        setStompClient(temp);
-
-        const headers = {
-            Authorization: `Bearer ${token}`,
-            "X-XSRF-TOKEN": getCookie("XSRF-TOKEN")
-        }
-
-        temp.connect(headers, onConnect, onError)
-    }
-
-    function getCookie(name: string) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) {
-            return parts.pop()?.split(";").shift();
-        }
-    }
-
-    const onConnect = () => {
-        setIsConnected(true);
-    }
-
-    const onError = (error : any) => {
-        console.log('Could not connect to WebSocket!', error);
-        setIsConnected(false);
-    };
-
-    const onMessageReceive = (payload : any) => {
-        setShouldUpdateChats(true);
-        const receivedMessage: Message = JSON.parse(payload.body);
-        if(currentChat && receivedMessage.chat?.id === currentChat.id)
-            setWsMessages([...wsMessages, receivedMessage]);
-    }
-
 
     const handleClickMenu = (e: any) => {
         setAnchorEl(e.currentTarget);
@@ -167,28 +121,6 @@ const HomePage = () => {
     const handleBackFromChatClick = () => {
         setCurrentChat(null);
     }
-
-    useEffect(() => { //The moment that the new message is saved, it will be loaded.
-        setWsMessages([...wsMessages, newMessage])
-        stompClient?.send("/app/message", {}, JSON.stringify(newMessage));
-    }, [newMessage])
-
-    useEffect(() => {
-        setWsMessages(messages)
-    }, [messages])
-
-    useEffect(() => {
-        if(isConnected && stompClient && curUser && currentChat){
-            const subscription = stompClient.subscribe("/chat/"+currentChat.id.toString(), onMessageReceive);
-            return () => {
-                subscription.unsubscribe();
-            }
-        }
-    })
-
-    useEffect(() => {
-        connect();
-    },[])
 
     const handleCreateNewMessage = () => {
         const message: MessageRequest = { userId: curUser?.id ?? 0, chatId: currentChat?.id ?? 0, content: content }
@@ -273,7 +205,6 @@ const HomePage = () => {
     }, [token]);
 
     useEffect(() => {
-        //PENIS
         if (curUser === null) return
 
         dispatch(getUserChats({ user: curUser, token: token }))
@@ -291,7 +222,7 @@ const HomePage = () => {
                 setIsSnackbarSuccessful(false);
                 setOpenSnackbar(true);
             });
-    }, [ curUser, shouldUpdateChats, token, dispatch, currentChat ])
+    }, [ curUser, token, dispatch, currentChat ])
 
     useEffect(() => {
         if (currentChat === null) return
@@ -483,7 +414,7 @@ const HomePage = () => {
                     </div>
                     <div className='flex-1 px-10 h-[84%] overflow-y-scroll'>
                         <div className='space-y-1 flex flex-col justify-center  py-2'>
-                            {wsMessages.map((item) => <MessageCard key={item.id} content={item.content ?? ''} isChatMessage={currentChat.isGroupChat ?? false} senderName={item.user?.fullName ?? ''} isReqUserMessage={item.user?.id === curUser?.id} />)}
+                            {messages.map((item) => <MessageCard key={item.id} content={item.content ?? ''} isChatMessage={currentChat.isGroupChat ?? false} senderName={item.user?.fullName ?? ''} isReqUserMessage={item.user?.id === curUser?.id} />)}
                         </div>
                     </div>
 

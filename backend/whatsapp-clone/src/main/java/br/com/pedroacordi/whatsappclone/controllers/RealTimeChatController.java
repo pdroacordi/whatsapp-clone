@@ -2,15 +2,25 @@ package br.com.pedroacordi.whatsappclone.controllers;
 
 import br.com.pedroacordi.whatsappclone.models.Chat;
 import br.com.pedroacordi.whatsappclone.models.Message;
-import org.springframework.beans.factory.annotation.Autowired;
+import br.com.pedroacordi.whatsappclone.response.ApiResponse;
+import br.com.pedroacordi.whatsappclone.services.chat.ChatService;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Controller;
 
+@Controller
 public class RealTimeChatController {
 
-    private SimpMessagingTemplate simpMessagingTemplate;
+
+    private final SimpMessagingTemplate simpMessagingTemplate;
+    private final ChatService chatService;
+
+    public RealTimeChatController(SimpMessagingTemplate simpMessagingTemplate, ChatService chatService) {
+        this.simpMessagingTemplate = simpMessagingTemplate;
+        this.chatService = chatService;
+    }
 
     @MessageMapping("/message")
     @SendTo("/chat/public")
@@ -20,9 +30,12 @@ public class RealTimeChatController {
     }
 
     @MessageMapping("/chats")
-    @SendTo("/chat/public")
-    public void updateChat(@Payload Chat chat) {
-        simpMessagingTemplate.convertAndSend("/chat/update", chat);
+    public void updateChat(@Payload Chat givenChat) {
+        Chat chat = chatService.findChatById(givenChat.getId());
+        chat.getUsers().forEach(user -> simpMessagingTemplate.convertAndSendToUser(
+                user.getId().toString(),
+                "/queue/updates",
+                new ApiResponse("update the chat", true)));
     }
 
 }

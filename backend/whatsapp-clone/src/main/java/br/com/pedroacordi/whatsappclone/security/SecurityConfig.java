@@ -40,9 +40,9 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/**").authenticated()
-                        .anyRequest().permitAll())
-                .addFilterBefore(new TokenFilter(), BasicAuthenticationFilter.class);
+                //        .requestMatchers("/api/**").authenticated()
+                        .anyRequest().permitAll());
+                //.addFilterBefore(new TokenFilter(), BasicAuthenticationFilter.class);
 
         return http.build();
     }
