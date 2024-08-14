@@ -59,10 +59,13 @@ export const getAllMessagesFromChat = createAsyncThunk(
     }
 );
 
+
 const messageSlice = createSlice({
     name: 'message',
     initialState,
-    reducers: {},
+    reducers: {
+        
+    },
     extraReducers: (builder) => {
         builder
             //Create message

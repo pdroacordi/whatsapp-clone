@@ -28,7 +28,7 @@ public class Chat implements Serializable {
     @ManyToOne
     private User createdBy;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     private Set<User> users = new HashSet<>();
 
     @ManyToMany

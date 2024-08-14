@@ -21,6 +21,7 @@ import { createMessage, getAllMessagesFromChat } from '../../Redux/features/mess
 import { MessageRequest } from '../../Request/MessageRequest';
 import { User } from '../../Models/User';
 import { Message } from '../../Models/Message';
+import { webSocketService } from '../../Config/WebSocketService';
 
 
 const HomePage = () => {
@@ -37,8 +38,10 @@ const HomePage = () => {
     const [isSnackbarSuccessful, setIsSnackbarSuccessful] = useState<boolean>(true);
 
     const { curUser, searchUsers } = useSelector((state: RootState) => state.user);
-    const { chats } = useSelector((state: RootState) => state.chat);
+    const { chats, createdChat, createdGroup } = useSelector((state: RootState) => state.chat);
     const { messages, newMessage } = useSelector((state: RootState) => state.message);
+
+    const [chatMessages, setChatMessages] = useState<Message[]>([]);
 
     const [resultUsers, setResultUsers] = useState<User[]>([]);
 
@@ -175,6 +178,25 @@ const HomePage = () => {
         setOpenSnackbar(!openSnackbar);
     }
 
+    const getAllChatsForUser = () => {
+        if (curUser === null) return
+
+        dispatch(getUserChats({ user: curUser, token: token }))
+            .then(result => {
+                if (result.payload.status !== 200) {
+                    setSnackbarMessage('Failed to get user chats: ' + result.payload.message);
+                    setIsSnackbarSuccessful(false);
+                    setOpenSnackbar(true);
+                    return;
+                }
+            })
+            .catch(error => {
+                setSnackbarMessage('Failed to get user chats: ' + error);
+                setIsSnackbarSuccessful(false);
+                setOpenSnackbar(true);
+            });
+    }
+
     useEffect(() => {
         if (isProfileOpen) {
             setProfileAnimation('profile-animate-in');
@@ -203,26 +225,6 @@ const HomePage = () => {
                 setOpenSnackbar(true);
             });
     }, [token]);
-
-    useEffect(() => {
-        if (curUser === null) return
-
-        dispatch(getUserChats({ user: curUser, token: token }))
-            .then(result => {
-                console.log(result.payload);
-                if (result.payload.status !== 200) {
-                    setSnackbarMessage('Failed to get user chats: ' + result.payload.message);
-                    setIsSnackbarSuccessful(false);
-                    setOpenSnackbar(true);
-                    return;
-                }
-            })
-            .catch(error => {
-                setSnackbarMessage('Failed to get user chats: ' + error);
-                setIsSnackbarSuccessful(false);
-                setOpenSnackbar(true);
-            });
-    }, [ curUser, token, dispatch, currentChat ])
 
     useEffect(() => {
         if (currentChat === null) return
@@ -260,6 +262,66 @@ const HomePage = () => {
 
         setResultUsers(newUsers);
     }, [searchUsers, queries])
+
+    //////WEBSOCKETS
+
+    ///Messages
+    useEffect(() => {
+        if (newMessage) {
+            webSocketService.sendMessage(newMessage);
+        }
+    }, [newMessage])
+
+    useEffect(() => {
+        if (currentChat) {
+            webSocketService.stompClient?.subscribe(`/chat/${currentChat.id}`, (payload: any) => {
+                try {
+                    const receivedMessage: Message = JSON.parse(payload.body);
+                    if (receivedMessage.chat?.id !== currentChat.id)
+                        return;
+                    setChatMessages(previousMessages => [...previousMessages, receivedMessage])
+                } catch (error: any) {
+
+                }
+            });
+        }
+    }, [currentChat])
+
+    useEffect(() => {
+        if (currentChat) {
+            setChatMessages(messages);
+        }
+    }, [messages])
+
+    ///Chats
+    useEffect(() => {
+        if (curUser === null) return;
+        webSocketService.stompClient?.subscribe(`/user/${curUser.id}/queue`, (message) => {
+            try {
+                const response = JSON.parse(message.body);
+                if(response.message !== 'update the chat') return;
+                getAllChatsForUser();
+            } catch (error: any) {
+
+            }
+        });
+    }, [curUser])
+
+    useEffect(() => {
+        if (createdChat === null) return;
+        webSocketService.sendChatCreationEvent(createdChat);
+    }, [createdChat])
+
+    useEffect(() => {
+        if (createdGroup === null) return;
+        webSocketService.sendChatCreationEvent(createdGroup ?? createdChat);
+    }, [createdGroup])
+
+    useEffect(() => {
+        getAllChatsForUser();
+    },[])
+
+
 
     return (
         <div className='flex flex-wrap min-h-screen'>
@@ -414,7 +476,7 @@ const HomePage = () => {
                     </div>
                     <div className='flex-1 px-10 h-[84%] overflow-y-scroll'>
                         <div className='space-y-1 flex flex-col justify-center  py-2'>
-                            {messages.map((item) => <MessageCard key={item.id} content={item.content ?? ''} isChatMessage={currentChat.isGroupChat ?? false} senderName={item.user?.fullName ?? ''} isReqUserMessage={item.user?.id === curUser?.id} />)}
+                            {chatMessages.map((item) => <MessageCard key={item.id} content={item.content ?? ''} isChatMessage={currentChat.isGroupChat ?? false} senderName={item.user?.fullName ?? ''} isReqUserMessage={item.user?.id === curUser?.id} />)}
                         </div>
                     </div>
 

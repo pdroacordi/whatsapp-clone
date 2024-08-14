@@ -61,6 +61,20 @@ public class TokenUtil {
                 : null;
     }
 
+    public static Authentication decodeToken(String token) {
+
+        Jws<Claims> claims = getClaimsFromToken(token);
+        String subject = claims.getBody().getSubject();
+        String issuer = claims.getBody().getIssuer();
+        String authorities = String.valueOf(claims.getBody().get("authorities"));
+        Date exp = claims.getBody().getExpiration();
+        List<GrantedAuthority> authorityList = AuthorityUtils.commaSeparatedStringToAuthorityList(authorities);
+
+        return isValidToken(subject, issuer, exp)
+                ? new UsernamePasswordAuthenticationToken(subject, null, authorityList)
+                : null;
+    }
+
     public static boolean isValidToken(String subject, String issuer, Date exp){
         return subject != null && !subject.isEmpty() && issuer.equals(ISSUER) && exp.after(new Date(System.currentTimeMillis()));
     }

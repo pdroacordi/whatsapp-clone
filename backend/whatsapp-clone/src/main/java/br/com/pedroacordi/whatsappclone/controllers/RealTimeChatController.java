@@ -24,7 +24,7 @@ public class RealTimeChatController {
 
     @MessageMapping("/message")
     @SendTo("/chat/public")
-    public Message receiveGroupMessage(@Payload Message message){
+    public Message receiveMessage(@Payload Message message){
         simpMessagingTemplate.convertAndSend("/chat/"+message.getChat().getId().toString(), message);
         return message;
     }
@@ -34,7 +34,7 @@ public class RealTimeChatController {
         Chat chat = chatService.findChatById(givenChat.getId());
         chat.getUsers().forEach(user -> simpMessagingTemplate.convertAndSendToUser(
                 user.getId().toString(),
-                "/queue/updates",
+                "/queue",
                 new ApiResponse("update the chat", true)));
     }
 
