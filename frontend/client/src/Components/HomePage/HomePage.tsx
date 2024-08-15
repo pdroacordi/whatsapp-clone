@@ -246,13 +246,12 @@ const HomePage = () => {
     }, [currentChat])
 
     useEffect(() => {
-        if (queries === '') {
+        if (queries === '' || queries === null) {
             setResultUsers([]);
             return;
         }
         const existingUserIds = new Set(resultUsers.map(user => user.id));
         const newUsers = resultUsers.slice(); // Cria uma cópia do array de usuários
-
         searchUsers?.content.forEach(user => {
             if (!existingUserIds.has(user.id)) {
                 newUsers.push(user); // Adiciona o usuário se o ID não estiver no Set
@@ -261,7 +260,7 @@ const HomePage = () => {
         });
 
         setResultUsers(newUsers);
-    }, [searchUsers, queries])
+    }, [queries])
 
     //////WEBSOCKETS
 

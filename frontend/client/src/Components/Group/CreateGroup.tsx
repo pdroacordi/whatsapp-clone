@@ -42,6 +42,7 @@ const CreateGroup: React.FC<CreateGroupProps> = ({ handleCloseOpenCreateGroup })
     }
 
     const handleSearch = (e: string) => {
+        if(e===null || e==='') return;
         dispatch(searchForUser({ query: e, page: 0, token: token }))
             .then(result => {
                 if (result.payload.status !== 200) {

@@ -37,6 +37,7 @@ class WebSocketService {
 
 
   sendMessage(message: Message) {
+    if(!this.stompClient?.connected) return;
     this.stompClient?.publish({
       destination: '/app/message',
       body: JSON.stringify(message),
@@ -44,6 +45,7 @@ class WebSocketService {
   }
 
   sendChatCreationEvent(chat : Chat){
+    if(!this.stompClient?.connected) return;
     this.stompClient?.publish({
         destination: '/app/chats',
         body: JSON.stringify(chat)
