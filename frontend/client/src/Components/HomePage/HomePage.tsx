@@ -272,6 +272,7 @@ const HomePage = () => {
     }, [newMessage])
 
     useEffect(() => {
+        if (!webSocketService.stompClient?.connected) return;
         if (currentChat) {
             webSocketService.stompClient?.subscribe(`/chat/${currentChat.id}`, (payload: any) => {
                 try {
@@ -294,6 +295,7 @@ const HomePage = () => {
 
     ///Chats
     useEffect(() => {
+        if (!webSocketService.stompClient?.connected) return;
         if (curUser === null) return;
         webSocketService.stompClient?.subscribe(`/user/${curUser.id}/queue`, (payload:any) => {
             try {
