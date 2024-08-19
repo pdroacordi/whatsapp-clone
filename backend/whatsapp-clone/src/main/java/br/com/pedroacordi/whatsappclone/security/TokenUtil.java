@@ -5,6 +5,7 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -19,12 +20,14 @@ import java.util.List;
 public class TokenUtil {
 
     public static final String JWT_HEADER = "Authorization";
-    private static final String SECRET_KEY = "ais451e2u45112sad20214e332djmqopixlaoiwdoiajx152e6312cxa56s";
+
+    @Value("${PASSWORD_SECRET_KEY}")
+    private static final String SECRET_KEY = "";
     private static final long SECONDS   = 1000;
     private static final long MINUTES    = 60 * SECONDS;
     private static final long HOURS      = 60 * MINUTES;
     private static final long DAYS       = 24 * HOURS;
-    public static final long EXPIRATION = 1 * DAYS;
+    public static final long EXPIRATION = 2 * DAYS;
 
     private static final String ISSUER = "*CompNam*";
     private static final String PREFIX = "Bearer ";

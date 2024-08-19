@@ -2,7 +2,6 @@ import { Alert, Button, CircularProgress, Snackbar } from '@mui/material';
 import React, { useState } from 'react'
 import { AiFillCamera } from 'react-icons/ai';
 import { BsArrowLeft, BsCheck2 } from 'react-icons/bs'
-import { CLOUD_NAME, PRESET_NAME } from '../../Config/api';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../Redux/store';
 import { Chat } from '../../Models/Chat';
@@ -31,9 +30,9 @@ const NewGroup: React.FC<NewGroupProps> = ({ handleBackStep, users }) => {
     const uploadToCloudinary = (pictures: any) => {
         const data = new FormData();
         data.append("file", pictures);
-        data.append("upload_preset", PRESET_NAME);
-        data.append('cloud_name', CLOUD_NAME);
-        fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+        data.append("upload_preset", process.env.REACT_APP_PRESET_NAME??'' );
+        data.append('cloud_name', process.env.REACT_APP_CLOUD_NAME??'');
+        fetch(`https://api.cloudinary.com/v1_1/${process.env.REACT_APP_CLOUD_NAME}/image/upload`, {
             method: 'POST',
             body: data
         })

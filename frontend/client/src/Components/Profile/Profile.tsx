@@ -3,7 +3,6 @@ import { BsArrowLeft, BsCheck, BsPencil } from 'react-icons/bs'
 import './Profile.css';
 import { useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../Redux/store';
-import { CLOUD_NAME, PRESET_NAME } from '../../Config/api';
 import { useDispatch } from 'react-redux';
 import { updateUser } from '../../Redux/features/user/userSlice';
 import { Alert, Snackbar } from '@mui/material';
@@ -64,9 +63,9 @@ const Profile: React.FC<ProfileProps> = ({ handleCloseOpenProfile }) => {
     const uploadToCloudinary = (pictures: any) => {
         const data = new FormData();
         data.append("file", pictures);
-        data.append("upload_preset", PRESET_NAME);
-        data.append('cloud_name', CLOUD_NAME);
-        fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+        data.append("upload_preset", process.env.REACT_APP_PRESET_NAME??'');
+        data.append('cloud_name', process.env.REACT_APP_CLOUD_NAME??'');
+        fetch(`https://api.cloudinary.com/v1_1/${process.env.REACT_APP_CLOUD_NAME}/image/upload`, {
             method: 'POST',
             body: data
         })
