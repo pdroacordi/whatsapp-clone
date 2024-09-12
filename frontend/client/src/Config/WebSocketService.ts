@@ -17,7 +17,6 @@ class WebSocketService {
 
   initializeWebSocketConnection() {
     const socket = new SockJS(`${this.serverUrl}?Authorization=${this.token}`);
-    console.log(`${this.serverUrl}?token=${this.token}`)
     this.stompClient = new Client({
       webSocketFactory: () => socket,
       reconnectDelay: this.reconnectDelay,
@@ -37,7 +36,6 @@ class WebSocketService {
 
 
   sendMessage(message: Message) {
-    if(!this.stompClient?.connected) return;
     this.stompClient?.publish({
       destination: '/app/message',
       body: JSON.stringify(message),
@@ -45,7 +43,6 @@ class WebSocketService {
   }
 
   sendChatCreationEvent(chat : Chat){
-    if(!this.stompClient?.connected) return;
     this.stompClient?.publish({
         destination: '/app/chats',
         body: JSON.stringify(chat)

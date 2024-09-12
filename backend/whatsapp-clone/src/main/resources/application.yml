@@ -1,12 +1,14 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/whatsapp?useTimezone=true&serverTimezone=UTC
-    username: ${DATABASE_USERNAME}
-    password: ${DATABASE_PASSWORD}
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: none
     show-sql: true
     open-in-view: true
+password:
+  secret-key: ${PASSWORD_SECRET_KEY}
 

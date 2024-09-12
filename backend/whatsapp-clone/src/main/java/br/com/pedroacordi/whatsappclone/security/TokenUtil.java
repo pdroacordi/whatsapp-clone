@@ -21,7 +21,7 @@ public class TokenUtil {
 
     public static final String JWT_HEADER = "Authorization";
 
-    @Value("${PASSWORD_SECRET_KEY}")
+    @Value("${password.secret-key}")
     private static final String SECRET_KEY = "";
     private static final long SECONDS   = 1000;
     private static final long MINUTES    = 60 * SECONDS;

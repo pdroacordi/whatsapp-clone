@@ -246,12 +246,13 @@ const HomePage = () => {
     }, [currentChat])
 
     useEffect(() => {
-        if (queries === '' || queries === null) {
+        if (queries === '') {
             setResultUsers([]);
             return;
         }
         const existingUserIds = new Set(resultUsers.map(user => user.id));
         const newUsers = resultUsers.slice(); // Cria uma cópia do array de usuários
+
         searchUsers?.content.forEach(user => {
             if (!existingUserIds.has(user.id)) {
                 newUsers.push(user); // Adiciona o usuário se o ID não estiver no Set
@@ -260,7 +261,7 @@ const HomePage = () => {
         });
 
         setResultUsers(newUsers);
-    }, [queries])
+    }, [searchUsers, queries])
 
     //////WEBSOCKETS
 
@@ -272,7 +273,7 @@ const HomePage = () => {
     }, [newMessage])
 
     useEffect(() => {
-        if (!webSocketService.stompClient?.connected) return;
+        if(!webSocketService.stompClient || !webSocketService.stompClient.connected) return;
         if (currentChat) {
             webSocketService.stompClient?.subscribe(`/chat/${currentChat.id}`, (payload: any) => {
                 try {
@@ -295,8 +296,8 @@ const HomePage = () => {
 
     ///Chats
     useEffect(() => {
-        if (!webSocketService.stompClient?.connected) return;
         if (curUser === null) return;
+        if (!webSocketService.stompClient || !webSocketService.stompClient.connected) return;
         webSocketService.stompClient?.subscribe(`/user/${curUser.id}/queue`, (payload:any) => {
             try {
                 const response = JSON.parse(payload.body);
@@ -306,7 +307,7 @@ const HomePage = () => {
 
             }
         });
-    }, [curUser])
+    }, [webSocketService.stompClient])
 
     useEffect(() => {
         if (createdChat === null) return;
