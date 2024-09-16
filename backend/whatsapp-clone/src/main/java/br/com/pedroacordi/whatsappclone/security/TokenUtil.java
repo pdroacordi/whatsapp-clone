@@ -3,13 +3,14 @@ package br.com.pedroacordi.whatsappclone.security;
 import br.com.pedroacordi.whatsappclone.models.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import jakarta.servlet.ServletException;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.security.Key;
@@ -17,12 +18,11 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+@Component
 public class TokenUtil {
 
     public static final String JWT_HEADER = "Authorization";
 
-    @Value("${password.secret-key}")
-    private static final String SECRET_KEY = "";
     private static final long SECONDS   = 1000;
     private static final long MINUTES    = 60 * SECONDS;
     private static final long HOURS      = 60 * MINUTES;
@@ -31,6 +31,15 @@ public class TokenUtil {
 
     private static final String ISSUER = "*CompNam*";
     private static final String PREFIX = "Bearer ";
+
+    @Value("${password.secret-key}")
+    private String secretKey;
+    private static String SECRET_KEY;
+
+    @PostConstruct
+    public void init() {
+        SECRET_KEY = secretKey;
+    }
 
     public static String encode(User user){
         Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());

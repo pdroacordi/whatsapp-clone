@@ -273,19 +273,19 @@ const HomePage = () => {
     }, [newMessage])
 
     useEffect(() => {
-        if(!webSocketService.stompClient || !webSocketService.stompClient.connected) return;
-        if (currentChat) {
-            webSocketService.stompClient?.subscribe(`/chat/${currentChat.id}`, (payload: any) => {
-                try {
-                    const receivedMessage: Message = JSON.parse(payload.body);
-                    if (receivedMessage.chat?.id !== currentChat.id)
-                        return;
-                    setChatMessages(previousMessages => [...previousMessages, receivedMessage])
-                } catch (error: any) {
+        if (!webSocketService.stompClient || !webSocketService.stompClient.connected) return;
+        if (!currentChat) return;
+        webSocketService.stompClient?.subscribe(`/chat/${currentChat.id}`, (payload: any) => {
+            try {
+                const receivedMessage: Message = JSON.parse(payload.body);
+                if (receivedMessage.chat?.id !== currentChat.id)
+                    return;
+                setChatMessages(previousMessages => [...previousMessages, receivedMessage])
+            } catch (error: any) {
 
-                }
-            });
-        }
+            }
+        });
+
     }, [currentChat])
 
     useEffect(() => {
@@ -298,10 +298,10 @@ const HomePage = () => {
     useEffect(() => {
         if (curUser === null) return;
         if (!webSocketService.stompClient || !webSocketService.stompClient.connected) return;
-        webSocketService.stompClient?.subscribe(`/user/${curUser.id}/queue`, (payload:any) => {
+        webSocketService.stompClient?.subscribe(`/user/${curUser.id}/queue`, (payload: any) => {
             try {
                 const response = JSON.parse(payload.body);
-                if(response.message !== 'update the chat') return;
+                if (response.message !== 'update the chat') return;
                 getAllChatsForUser();
             } catch (error: any) {
 
@@ -321,7 +321,7 @@ const HomePage = () => {
 
     useEffect(() => {
         getAllChatsForUser();
-    },[])
+    }, [])
 
 
 

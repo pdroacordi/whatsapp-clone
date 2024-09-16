@@ -1,0 +1,71 @@
+services:
+  mysqldb:
+    container_name: whatsapp-db
+    image: mysql:8.0
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQLDB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQLDB_DATABASE}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysqlvolume:/var/lib/mysql
+    networks:
+      - whatsapp-network
+      
+  # Serviço do Spring
+  backend-app:
+    container_name: whatsapp-backend
+    depends_on: 
+      - mysqldb
+    build:
+      context: ./backend/whatsapp-clone
+      dockerfile: Dockerfile
+    working_dir: /usr/src/whatsappcloneapp-backend
+    env_file: .env
+    restart: no    
+    environment:
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${MYSQLDB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQLDB_USER_PASSWORD}
+      PASSWORD_SECRET_KEY: ${PASSWORD_SECRET_KEY}
+    ports:
+      - "8080:8080"
+    volumes:
+      - .m2:/root/.m2
+    networks:
+      - whatsapp-network
+      
+  # Serviço do React (frontend)
+  frontend-app:
+    depends_on: 
+      - backend-app
+    restart: unless-stopped
+    container_name: whatsapp-frontend
+    build:
+      context: ./frontend/client
+      dockerfile: Dockerfile
+    working_dir: /usr/src/whatsappcloneapp-frontend
+    env_file: .env
+    environment:
+      REACT_APP_API_URL: "http://localhost:8080"
+      REACT_APP_CLOUD_NAME: ${CLOUD_NAME}
+      REACT_APP_PRESET_NAME: whatsapp
+    volumes:
+      - ./frontend/client:/usr/src/whatsappcloneapp-frontend
+      - /usr/src/whatsappcloneapp-frontend/node_modules
+    ports:
+      - "3000:3000"
+    command: sh -c "npm install && npm start"
+    networks:
+      - whatsapp-network
+
+volumes:
+  mysqlvolume:
+networks:
+  whatsapp-network:
+    driver: bridge
+  default:
+    external:
+      name: whatsapp-network

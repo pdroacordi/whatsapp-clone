@@ -1,0 +1,6 @@
+**/target/
+**/docs/
+**/view/
+**/.git
+**/README.md
+**/.idea

@@ -1,6 +1,6 @@
 # WhatsApp Clone 💬
 
-Welcome to the GitHub repository of my WhatsApp Clone. This project is a simplified version of the popular messaging application WhatsApp. It aims to demonstrate the core features of real-time messaging. Please notice that while I write this, the project is still in its MVP and does not count the functionalities I intend to add.
+Welcome to the GitHub repository of my WhatsApp Clone. This project is a simplified version of the popular messaging application WhatsApp. It aims to demonstrate the core features of real-time messaging. Please notice that while I write this, the project is still in its MVP and does not count with the functionalities I intend to add and has some bugs regarding group chats.
 
 ## ⚙️ Features
 
@@ -17,19 +17,16 @@ This project is built using:
 - **File Storage:** Cloudinary for storing and managing media files.
 - **Real-time Communication:** Stomp.js over WebSockets for real-time bi-directional communication.
 - **Authentication:** JWT for token-based authentication and Spring Security for authorization.
+- **CI/CD:** Docker-compose for easy environmnents.
 
 ## 🔧 Getting Started
 
-Follow these instructions to get a copy of the project up and running on your local machine for development and testing purposes.
+Follow these instructions to get a copy of the project up and running on your local machine for testing purposes.
 
 ### Prerequisites
 
-- Node.js
-- npm
-- Java 
-- JDK
-- Maven
-- MySQL
+- Docker
+- Docker-compose
 
 ### Installation
 
@@ -37,27 +34,23 @@ Follow these instructions to get a copy of the project up and running on your lo
 ```bash
    git clone https://github.com/pdroacordi/whatsapp-clone.git
 ```
-2. Install NPM packages:
+
+2. Add your own `.env` file at the root of the project containing the environment variables present in the docker-compose.yml file. Alternatively, you can replace the `${...}` in the docker-compose.yml file for the values.
+
+
+3. Build the docker-compose container:
 ```bash
-npm install
+sudo docker-compose up --build -d
 ```
 
-3. Install Maven dependencies:
-```bash
-mvn clean install
-```
-Or open the project with your preferred IDE and install the dependencies automatically.
+The process of building the containers might take a litte while. If you want to keep up of the building process, you can check the logs:
 
-4. Start the back-end application:
 ```bash
-mvn spring-boot:run
+sudo docker logs whatsapp-backend
 ```
-Or do it using the IDE. The application will be running at the port 8080.
-5. Start the front-end server:
+or
 ```bash
-npm start
+sudo docker logs whatsapp-frontend
 ```
-The application will be running at `http://localhost:3000`
 
-Remember to add your own API keys and secret key.
-
+Even after finishing the building, the front-end app will take a minute to be up, but you may find it at `http://localhost:3000` or other port you may have defined it.

@@ -4,7 +4,6 @@ import { AiFillCamera } from 'react-icons/ai';
 import { BsArrowLeft, BsCheck2 } from 'react-icons/bs'
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../Redux/store';
-import { Chat } from '../../Models/Chat';
 import { User } from '../../Models/User';
 import { createGroup } from '../../Redux/features/chat/chatSlice';
 import { GroupChatRequest } from '../../Request/ChatRequests';
